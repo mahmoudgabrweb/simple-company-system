@@ -1,0 +1,1 @@
+import{z as t,m as s}from"./CUG0QQ6v.js";const r=t("brand",{state:()=>({brands:[]}),actions:{async getBrands(){const{data:a}=await s("/brands");a.value&&(this.brands=a.value.data)},async getBrand(a){return console.log(a),await s(`/brands/${a}`)}}});export{r as u};

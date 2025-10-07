@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('clients', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
+            $table->string('name');
+            $table->string('phone', 50);
+            $table->string('alternative_phone', 50)->nullable();
+            $table->string('email')->nullable();
+            $table->text('map')->nullable();     // Google map (embed/link)
+            $table->text('address')->nullable();
+            $table->timestamps();
+
+            $table->index(['company_id', 'city_id']);
+            $table->unique(['company_id', 'phone']); // unique per company
+            $table->unique(['company_id', 'email']); // nullable unique per company
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('clients');
+    }
+};

@@ -1,0 +1,1 @@
+import{c as r}from"./CsDBccVe.js";import{f as i,c as l}from"./CUG0QQ6v.js";function c(){const e=i(),m=l(()=>{var t,n;return["#text","#comment"].includes((t=e.value)==null?void 0:t.$el.nodeName)?(n=e.value)==null?void 0:n.$el.nextElementSibling:r(e)});return{primitiveElement:e,currentElement:m}}export{c as u};

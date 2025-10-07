@@ -1,0 +1,86 @@
+@extends('admin.main')
+
+@section('css_sheets')
+    <link rel="stylesheet" href="{{ asset('admin-assets/lib/dataTables.bootstrap5.min.css') }}"/>
+    <style>.table thead th {
+            white-space: nowrap
+        }</style>
+@endsection
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="m-0">أنواع المصروفات</h4>
+            <a href="{{ route('voyager.expense_types.create') }}" class="btn btn-primary">
+                <i class="bx bx-plus"></i> إضافة نوع
+            </a>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="display-6">{{ $stats['total'] ?? 0 }}</div>
+                        <div class="text-muted">الإجمالي</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <table id="expense-types-table" class="table table-hover w-100">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th class="no-sort" style="width:140px;">إجراءات</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('js_scripts')
+    <script src="{{ asset('admin-assets/lib/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('admin-assets/lib/dataTables.bootstrap5.min.js') }}"></script>
+    <script>
+        $(function () {
+            const table = $('#expense-types-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {url: "{{ route('voyager.expense_types.load') }}"},
+                order: [[2, 'desc']],
+                language: {url: "{{ asset('admin-assets/i18n/ar.json') }}"},
+                columns: [
+                    {data: 'DT_RowIndex', name: 'DT_RowIndex', searchable: false, orderable: false},
+                    {data: 'name', name: 'name'},
+                    {data: 'created_at', name: 'created_at'},
+                    {data: 'actions', name: 'actions', searchable: false, orderable: false},
+                ]
+            });
+
+            // Delete (POST + _method=DELETE)
+            $(document).on('click', '.delete-record', function (e) {
+                e.preventDefault();
+                const url = $(this).data('url');
+                if (!confirm('هل أنت متأكد من الحذف؟')) return;
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {_method: 'DELETE', _token: $('meta[name="csrf-token"]').attr('content')},
+                    success: function () {
+                        table.ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                        alert('فشل الحذف: ' + (xhr.responseJSON?.message || 'HTTP ' + xhr.status));
+                    }
+                });
+            });
+        });
+    </script>
+@endsection

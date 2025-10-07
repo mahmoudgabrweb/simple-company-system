@@ -1,0 +1,68 @@
+{
+    "brands": [
+        {
+            "slug": "fulda",
+            "name": "فولدا",
+            "image": "/samples/brands/images/fulda.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "yokohama",
+            "name": "يوكوهاما",
+            "image": "/samples/brands/images/yokohama.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "pirelli",
+            "name": "بيريل",
+            "image": "/samples/brands/images/pirelli.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "acdelco",
+            "name": "إيه سي ديلكو",
+            "image": "/samples/brands/images/acdelco.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "bosch",
+            "name": "بوش",
+            "image": "/samples/brands/images/bosch.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "denso",
+            "name": "دينسو",
+            "image": "/samples/brands/images/denso.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "delphi",
+            "name": "ديلفي",
+            "image": "/samples/brands/images/delphi.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        },
+        {
+            "slug": "motorcraft",
+            "name": "موتوكرافت",
+            "image": "/samples/brands/images/motorcraft.png",
+            "description": "علامة تجارية ألمانية مشهورة متخصصة في صناعة الإطارات",
+            "country": "ألمانيا",
+            "countryFlag": "flag:de-4x3"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'accepted' => 'يجب قبول :attribute.',
+    'accepted_if' => 'يجب قبول :attribute عندما يكون :other هو :value.',
+    'active_url' => ':attribute ليس رابطاً صحيحاً.',
+    'after' => 'يجب أن يكون :attribute تاريخاً بعد :date.',
+    'after_or_equal' => 'يجب أن يكون :attribute تاريخاً بعد أو يساوي :date.',
+    'alpha' => 'يجب أن يحتوي :attribute على حروف فقط.',
+    'alpha_dash' => 'يجب أن يحتوي :attribute على حروف، أرقام، شرطات وشرطات سفلية فقط.',
+    'alpha_num' => 'يجب أن يحتوي :attribute على حروف وأرقام فقط.',
+    'array' => 'يجب أن يكون :attribute مصفوفة.',
+    'ascii' => 'يجب أن يحتوي :attribute على رموز وأحرف ASCII فقط.',
+    'before' => 'يجب أن يكون :attribute تاريخاً قبل :date.',
+    'before_or_equal' => 'يجب أن يكون :attribute تاريخاً قبل أو يساوي :date.',
+    'between' => [
+        'array' => 'يجب أن يحتوي :attribute بين :min و :max عنصر.',
+        'file' => 'يجب أن يكون حجم :attribute بين :min و :max كيلوبايت.',
+        'numeric' => 'يجب أن تكون قيمة :attribute بين :min و :max.',
+        'string' => 'يجب أن يكون عدد أحرف :attribute بين :min و :max.',
+    ],
+    'boolean' => 'يجب أن تكون قيمة :attribute صحيحة أو خاطئة.',
+    'confirmed' => 'تأكيد :attribute غير متطابق.',
+    'current_password' => 'كلمة المرور غير صحيحة.',
+    'date' => ':attribute ليس تاريخاً صحيحاً.',
+    'date_equals' => 'يجب أن يكون :attribute تاريخاً يساوي :date.',
+    'date_format' => 'تنسيق :attribute لا يطابق :format.',
+    'decimal' => 'يجب أن يحتوي :attribute على :decimal منازل عشرية.',
+    'declined' => 'يجب رفض :attribute.',
+];

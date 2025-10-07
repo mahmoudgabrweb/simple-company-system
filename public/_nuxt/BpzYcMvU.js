@@ -1,0 +1,1 @@
+const t={brand:{isOriginal:{t:0,b:{t:2,i:[{t:3}],s:"اصلي"}}},vehicle:{vehicleMaker:{t:0,b:{t:2,i:[{t:3}],s:"صانع المركبة"}},filterTitle:{t:0,b:{t:2,i:[{t:3}],s:"صانع المركبة، الموديل، السنة"}},model:{t:0,b:{t:2,i:[{t:3}],s:"الموديل"}},manufactureYear:{t:0,b:{t:2,i:[{t:3}],s:"سنة التصنيع"}}},section:{select:{t:0,b:{t:2,i:[{t:3}],s:"اختر القسم"}}}};export{t as default};
