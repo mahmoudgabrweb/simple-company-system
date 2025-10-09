@@ -51,5 +51,14 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
 
     Route::get('salaries/load', [\App\Http\Controllers\Admin\SalaryController::class, 'load'])->name('voyager.salaries.load');
 
+    Route::post('quotations', [\App\Http\Controllers\Admin\QuotationController::class, 'store'])->name('admin.quotations.store');
+    Route::put('quotations/{id}', [\App\Http\Controllers\Admin\QuotationController::class, 'update'])->name('admin.quotations.update');
+    Route::post('quotations/{id}/resend', [\App\Http\Controllers\Admin\QuotationController::class, 'resend'])->name('admin.quotations.resend');
+
+    // Items & sub-items
+    Route::post('quotations/{quotation}/items', [\App\Http\Controllers\Admin\QuotationItemController::class, 'store'])->name('voyager.quotations.items.store');
+    Route::put('quotation-items/{item}', [\App\Http\Controllers\Admin\QuotationItemController::class, 'update'])->name('voyager.quotations.items.update');
+    Route::delete('quotation-items/{item}', [\App\Http\Controllers\Admin\QuotationItemController::class, 'destroy'])->name('voyager.quotations.items.delete');
+
     Voyager::routes();
 });

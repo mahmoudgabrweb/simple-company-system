@@ -9,14 +9,17 @@ return new class extends Migration {
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
-            $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
-
             $table->string('name');
-            $table->text('address')->nullable();
-            $table->string('location')->nullable(); // e.g., GPS or short descriptor
-            $table->text('map')->nullable();        // Google map (embed/link)
+            $table->string('address')->nullable();
+            $table->string('location')->nullable();
+            $table->text('map')->nullable();
+
+            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
+            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
+
+            // Project-level discount (applies to all quotations)
+            $table->decimal('discount_percent', 5, 2)->default(0);
 
             $table->timestamps();
 
