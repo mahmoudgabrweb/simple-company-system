@@ -1,0 +1,46 @@
+/* ===== Ensure dark sidebar text is visible ===== */
+.layout-menu { background-color: #1D2A3A !important; }
+
+.menu-vertical .menu-item .menu-link,
+.menu-vertical .menu-item .menu-link > div,
+.menu-vertical .menu-item .menu-link .menu-text,
+.menu-vertical .menu-header,
+.menu-vertical .menu-header small,
+.menu-vertical .menu-inner > .menu-item > .menu-link .menu-icon {
+    color: #fff !important;
+    opacity: .95;
+}
+
+.menu-vertical .menu-item .menu-link:hover {
+    background: rgba(255,255,255,.06) !important;
+    color: #fff !important;
+}
+
+.menu-vertical .menu-item.active > .menu-link,
+.menu-vertical .menu-item.open   > .menu-link {
+    background: rgba(184,149,100,.15) !important; /* #B89564 at 15% */
+    color: #fff !important;
+}
+
+.menu-vertical .menu-item .menu-icon,
+.menu-vertical .menu-item.active .menu-icon,
+.menu-vertical .menu-item:hover .menu-icon {
+    color: #fff !important;
+}
+
+/* Submenu chevrons/indicators */
+.menu-vertical .menu-toggle::after {
+    filter: brightness(2) !important;
+}
+
+/* Keep content area readable on white */
+body, .content-wrapper, .card, .table, .form-control, .form-select {
+    color: #1a1a1a; /* content text */
+}
+a { color: #1D2A3A; } a:hover { color: #14202c; }
+
+/* Accent color for focus */
+.form-control:focus, .form-select:focus {
+    border-color: #B89564 !important;
+    box-shadow: 0 0 0 .15rem rgba(184,149,100,.15) !important;
+}

@@ -1,7 +1,10 @@
 <!doctype html>
 
-<html lang="ar" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="rtl"
-      data-theme="theme-default" data-assets-path="../../admin-assets/"
+<html lang="en"
+      class="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
+      dir="ltr"
+      data-theme="theme-default"
+      data-assets-path="../../admin-assets/"
       data-template="vertical-menu-template-no-customizer"
       data-style="light">
 
@@ -54,6 +57,8 @@
     <link rel="stylesheet" href="{{ asset('admin-assets/lib/toastr.min.css') }}"/>
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal&display=swap" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/brand.css') }}"/>
     <style>
         body {
             font-family: 'Tajawal', sans-serif;
