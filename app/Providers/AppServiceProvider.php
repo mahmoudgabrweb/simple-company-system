@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
-use App\Services\GeneralSettings;
-use Illuminate\Support\Facades\Schema;
+use App\Models\Quotation;
+use App\Models\QuotationItem;
+use App\Models\QuotationSection;
+use App\Observers\QuotationObserver;
+use App\Observers\QuotationItemObserver;
+use App\Observers\QuotationSectionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +29,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Quotation::observe(QuotationObserver::class);
+        QuotationItem::observe(QuotationItemObserver::class);
+        QuotationSection::observe(QuotationSectionObserver::class);
     }
 }

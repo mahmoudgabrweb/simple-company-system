@@ -28,4 +28,14 @@ class Project extends Model
     {
         return $this->belongsTo(City::class);
     }
+
+    public function quotations()
+    {
+        return $this->hasMany(Quotation::class);
+    }
+
+    public function activeQuotation()
+    {
+        return $this->hasOne(Quotation::class)->where('is_active', true);
+    }
 }

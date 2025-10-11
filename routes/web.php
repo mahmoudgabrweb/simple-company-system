@@ -51,5 +51,28 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
 
     Route::get('salaries/load', [\App\Http\Controllers\Admin\SalaryController::class, 'load'])->name('voyager.salaries.load');
 
+    // send/resend + status
+    Route::post('quotations/{id}/send', [\App\Http\Controllers\Admin\QuotationController::class, 'send'])->name('admin.quotations.send');
+    Route::post('quotations/{id}/resend', [\App\Http\Controllers\Admin\QuotationController::class, 'resend'])->name('admin.quotations.resend');
+    Route::post('quotations/{id}/status', [\App\Http\Controllers\Admin\QuotationController::class, 'changeStatus'])->name('admin.quotations.status');
+
+    // sections
+    Route::post('quotations/{id}/sections', [\App\Http\Controllers\Admin\QuotationController::class, 'addSection'])->name('admin.quotations.sections.add');
+    Route::put('quotation-sections/{section}', [\App\Http\Controllers\Admin\QuotationController::class, 'updateSection'])->name('admin.quotations.sections.update');
+    Route::delete('quotation-sections/{section}', [\App\Http\Controllers\Admin\QuotationController::class, 'deleteSection'])->name('admin.quotations.sections.delete');
+    Route::post('quotations/{id}/sections/reorder', [\App\Http\Controllers\Admin\QuotationController::class, 'reorderSections'])->name('admin.quotations.sections.reorder');
+
+    // items
+    Route::post('quotation-sections/{section}/items', [\App\Http\Controllers\Admin\QuotationController::class, 'addItem'])->name('admin.quotations.items.add');
+    Route::put('quotation-items/{item}', [\App\Http\Controllers\Admin\QuotationController::class, 'updateItem'])->name('admin.quotations.items.update');
+    Route::delete('quotation-items/{item}', [\App\Http\Controllers\Admin\QuotationController::class, 'deleteItem'])->name('admin.quotations.items.delete');
+    Route::post('quotation-sections/{section}/items/reorder', [\App\Http\Controllers\Admin\QuotationController::class, 'reorderItems'])->name('admin.quotations.items.reorder');
+
+    Route::get('payments/{id}/attachment', [\App\Http\Controllers\Admin\PaymentController::class, 'download'])
+        ->name('admin.payments.attachment');
+
+    Route::get('project-expenses/{id}/attachment', [\App\Http\Controllers\Admin\ProjectExpenseController::class, 'download'])
+        ->name('admin.project-expenses.attachment');
+
     Voyager::routes();
 });
