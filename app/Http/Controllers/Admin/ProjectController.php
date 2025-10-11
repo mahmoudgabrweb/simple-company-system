@@ -19,14 +19,74 @@ class ProjectController extends MainController
         $this->model = Project::class;
     }
 
-    // Voyager: GET voyager.projects.index
-    public function index()
+    public function index(Request $request)
     {
-        $this->checkPermission('browse');
+        $this->authorize('browse', app(\App\Models\Project::class));
 
-        $stats = ['total' => Project::count()];
-        return view('admin.projects.index', compact('stats'));
+        $companyId = session('active_company_id')
+            ?? session('current_company_id')
+            ?? (auth()->user()->company_id ?? null);
+
+        // Base query + simple search (name/address)
+        $q = \App\Models\Project::query()
+            ->with(['client', 'city'])
+            ->when($companyId, fn($x) => $x->where('company_id', $companyId))
+            ->when($request->filled('q'), function ($x) use ($request) {
+                $term = '%' . $request->string('q') . '%';
+                $x->where(function ($w) use ($term) {
+                    $w->where('name', 'like', $term)
+                        ->orWhere('address', 'like', $term);
+                });
+            })
+            ->orderByDesc('id');
+
+        // Paginate the visible projects
+        $projects = $q->paginate(15)->appends($request->query());
+
+        // Pre-compute financials for the listed projects only
+        $projectIds = $projects->pluck('id');
+
+        // Total (from active quotation)
+        $activeTotals = \App\Models\Quotation::select('project_id', \DB::raw('MAX(total_amount) as total_amount'))
+            ->whereIn('project_id', $projectIds)
+            ->where('is_active', true)
+            ->groupBy('project_id')
+            ->pluck('total_amount', 'project_id');
+
+        // Paid (payments sum)
+        $paidTotals = \App\Models\Payment::select('project_id', \DB::raw('SUM(amount) as total'))
+            ->whereIn('project_id', $projectIds)
+            ->groupBy('project_id')
+            ->pluck('total', 'project_id');
+
+        // Expenses (project expenses sum)
+        $expenseTotals = \App\Models\ProjectExpense::select('project_id', \DB::raw('SUM(amount) as total'))
+            ->whereIn('project_id', $projectIds)
+            ->groupBy('project_id')
+            ->pluck('total', 'project_id');
+
+        // Map into finance array keyed by project_id
+        $finance = [];
+        foreach ($projectIds as $pid) {
+            $total = (float)($activeTotals[$pid] ?? 0);
+            $paid = (float)($paidTotals[$pid] ?? 0);
+            $exp = (float)($expenseTotals[$pid] ?? 0);
+            $remaining = $total - ($paid + $exp);
+            $finance[$pid] = compact('total', 'paid', 'exp', 'remaining');
+        }
+
+        return view('admin.projects.index', compact('projects', 'finance'));
     }
+
+
+    // Voyager: GET voyager.projects.index
+//    public function index()
+//    {
+//        $this->checkPermission('browse');
+//
+//        $stats = ['total' => Project::count()];
+//        return view('admin.projects.index', compact('stats'));
+//    }
 
     public function load(Request $request): JsonResponse
     {

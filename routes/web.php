@@ -74,5 +74,8 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
     Route::get('project-expenses/{id}/attachment', [\App\Http\Controllers\Admin\ProjectExpenseController::class, 'download'])
         ->name('admin.project-expenses.attachment');
 
+    Route::get('projects/{project}/financials', [\App\Http\Controllers\Admin\ProjectFinanceController::class, 'financials'])
+        ->name('voyager.projects.financials');
+
     Voyager::routes();
 });

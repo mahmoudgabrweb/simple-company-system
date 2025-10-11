@@ -9,7 +9,7 @@
             </a>
         </div>
 
-        {{-- بحث بسيط --}}
+        {{-- Simple search --}}
         <form method="get" class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-md-6">
@@ -26,23 +26,21 @@
         @if($projects->count() === 0)
             <div class="card p-4 text-center text-muted">لا توجد مشاريع.</div>
         @else
+            {{-- Project rows styled like your expenses page: table + per-project cards --}}
             @foreach($projects as $p)
                 @php
-                    // $finance passed from controller: ['total','paid','exp','remaining']
                     $f = $finance[$p->id] ?? ['total'=>0,'paid'=>0,'exp'=>0,'remaining'=>0];
                 @endphp
-
                 <div class="card p-3 mb-3">
                     <div class="d-flex justify-content-between flex-wrap gap-3">
                         <div>
                             <h5 class="m-0">{{ $p->name }}</h5>
                             <div class="text-muted small">
-                                عميل: {{ $p->client->name ?? '—' }}
-                                · مدينة: {{ $p->city->name ?? '—' }}
-                                · العنوان: {{ $p->address ?? '—' }}
+                                عميل: {{ $p->client->name ?? '—' }} · مدينة: {{ $p->city->name ?? '—' }} ·
+                                العنوان: {{ $p->address ?? '—' }}
                             </div>
                         </div>
-                        <div class="d-flex gap-2">
+                        <div>
                             <a href="{{ route('voyager.projects.financials', $p->id) }}" class="btn btn-outline-primary">
                                 تفاصيل الدفعات والمصروفات
                             </a>
@@ -50,31 +48,31 @@
                         </div>
                     </div>
 
-                    {{-- بطاقات: إجمالي العرض (النشط) / المدفوع / مصروفات المشروع / المتبقي --}}
+                    {{-- Cards: total, paid, expenses, remaining --}}
                     <div class="row g-2 mt-2">
                         <div class="col-6 col-md-3">
                             <div class="border rounded p-2 h-100">
                                 <div class="text-muted small">إجمالي العرض (النشط)</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['total'], 2) }}</div>
+                                <div class="fs-5 fw-bold">{{ number_format($f['total'],2) }}</div>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="border rounded p-2 h-100">
                                 <div class="text-muted small">إجمالي المدفوع</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['paid'], 2) }}</div>
+                                <div class="fs-5 fw-bold">{{ number_format($f['paid'],2) }}</div>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="border rounded p-2 h-100">
                                 <div class="text-muted small">إجمالي مصروفات المشروع</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['exp'], 2) }}</div>
+                                <div class="fs-5 fw-bold">{{ number_format($f['exp'],2) }}</div>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
                             <div class="border rounded p-2 h-100">
                                 <div class="text-muted small">المتبقي</div>
                                 <div class="fs-5 fw-bold {{ $f['remaining'] < 0 ? 'text-danger' : '' }}">
-                                    {{ number_format($f['remaining'], 2) }}
+                                    {{ number_format($f['remaining'],2) }}
                                 </div>
                             </div>
                         </div>
