@@ -21,17 +21,36 @@ class JobController extends MainController
     }
 
     // ───────────────── Voyager: GET voyager.jobs.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
 
+        // --- Stats (overall) ---
         $stats = [
-            'total' => Job::count(),
-            'active' => Job::where('is_active', 1)->count(),
-            'inactive' => Job::where('is_active', 0)->count(),
+            'total' => \App\Models\Job::count(),
+            'active' => \App\Models\Job::where('is_active', 1)->count(),
+            'inactive' => \App\Models\Job::where('is_active', 0)->count(),
         ];
 
-        return view('admin.jobs.index', compact('stats'));
+        // --- Filters (like projects page) ---
+        $q = trim((string)$request->get('q'));
+        $status = $request->get('status'); // 'active' | 'inactive' | null
+
+        $jobs = \App\Models\Job::query()
+            ->when($q !== '', function ($builder) use ($q) {
+                $builder->where(function ($w) use ($q) {
+                    $w->where('title', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%");
+                });
+            })
+            ->when(in_array($status, ['active', 'inactive'], true), function ($builder) use ($status) {
+                $builder->where('is_active', $status === 'active' ? 1 : 0);
+            })
+            ->orderByDesc('created_at')
+            ->paginate(15)
+            ->withQueryString(); // keep filters on pagination links
+
+        return view('admin.jobs.index', compact('jobs', 'stats'));
     }
 
     // ───────────────── Custom: GET /admin/jobs/load

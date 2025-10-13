@@ -20,15 +20,31 @@ class ClientController extends MainController
     }
 
     // Voyager: GET voyager.clients.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
+
+        $q = trim($request->get('q', ''));
+
+        $clients = Client::query()
+            ->with(['city' => fn($q) => $q->select('id', 'name')]) // if relation exists
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($inner) use ($q) {
+                    $inner->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('phone', 'like', "%{$q}%")
+                        ->orWhere('alternative_phone', 'like', "%{$q}%");
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
 
         $stats = [
             'total' => Client::count(),
         ];
 
-        return view('admin.clients.index', compact('stats'));
+        return view('admin.clients.index', compact('clients', 'stats', 'q'));
     }
 
     // Custom: GET /admin/clients/load

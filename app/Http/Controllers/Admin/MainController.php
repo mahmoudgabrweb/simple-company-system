@@ -17,7 +17,7 @@ class MainController extends Controller
      * @return DataType
      * @throws AuthorizationException
      */
-    final protected function checkPermission(string $action): DataType
+    final protected function checkPermission(string $action): DataType|null
     {
         $dataType = Voyager::model('DataType')->where('slug', '=', $this->moduleName)->first();
 

@@ -24,17 +24,37 @@ class EmployeeController extends MainController
     }
 
     // Voyager: GET voyager.employees.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
 
+        $q = trim($request->get('q', ''));
+
+        $employees = Employee::query()
+            ->with(['job' => fn($q) => $q->select('id', 'title')]) // if relation exists
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($inner) use ($q) {
+                    $inner->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('phone', 'like', "%{$q}%");
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
         $stats = [
-            'total' => Employee::count(),
-            'active' => Employee::whereNull('end_at')->count(),
-            'inactive' => Employee::whereNotNull('end_at')->count(),
+            'total'    => Employee::count(),
+            'active'   => Employee::when(function ($q) {
+                // only count if column exists; fall back to 0 if not
+                try { $q->where('is_active', 1); } catch (\Throwable $e) {}
+            })->count(),
+            'inactive' => Employee::when(function ($q) {
+                try { $q->where('is_active', 0); } catch (\Throwable $e) {}
+            })->count(),
         ];
 
-        return view('admin.employees.index', compact('stats'));
+        return view('admin.employees.index', compact('employees', 'stats', 'q'));
     }
 
     // Custom: GET /admin/employees/load

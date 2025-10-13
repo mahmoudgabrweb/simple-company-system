@@ -406,6 +406,201 @@
             opacity: 0.8;
         }
 
+        /* Project Details Modal */
+        .project-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .project-modal.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            max-width: 1200px;
+            margin: 4rem auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 2rem;
+            color: #333;
+            transition: all 0.3s ease;
+            z-index: 2001;
+        }
+
+        .close-modal:hover {
+            transform: rotate(90deg);
+            background: #667eea;
+            color: white;
+        }
+
+        .project-hero-img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+
+        .project-details {
+            padding: 3rem;
+        }
+
+        .project-header {
+            margin-bottom: 2rem;
+        }
+
+        .project-title {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .project-category {
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .project-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: #f9fafb;
+            border-radius: 15px;
+        }
+
+        .info-item h4 {
+            color: #667eea;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .project-description {
+            margin: 2rem 0;
+            line-height: 1.8;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .project-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.05);
+        }
+
+        .project-features {
+            margin: 3rem 0;
+        }
+
+        .features-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .feature-text h5 {
+            margin-bottom: 0.3rem;
+            color: #333;
+        }
+
+        .feature-text p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .nav-links {
@@ -426,6 +621,30 @@
 
             .portfolio-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 2rem 1rem;
+            }
+
+            .project-details {
+                padding: 2rem 1.5rem;
+            }
+
+            .project-title {
+                font-size: 2rem;
+            }
+
+            .project-hero-img {
+                height: 300px;
+            }
+
+            .close-modal {
+                top: 1rem;
+                right: 1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -602,7 +821,250 @@
     <p>&copy; 2025 Luxe Interiors. All rights reserved. Crafted with passion and precision.</p>
 </footer>
 
+<!-- Project Details Modal -->
+<div id="projectModal" class="project-modal">
+    <div class="close-modal" onclick="closeProject()">×</div>
+    <div class="modal-content">
+        <img id="modalHeroImg" class="project-hero-img" src="" alt="">
+        <div class="project-details">
+            <div class="project-header">
+                <h2 id="modalTitle" class="project-title"></h2>
+                <p id="modalCategory" class="project-category"></p>
+            </div>
+
+            <div class="project-info">
+                <div class="info-item">
+                    <h4>Client</h4>
+                    <p id="modalClient"></p>
+                </div>
+                <div class="info-item">
+                    <h4>Location</h4>
+                    <p id="modalLocation"></p>
+                </div>
+                <div class="info-item">
+                    <h4>Year</h4>
+                    <p id="modalYear"></p>
+                </div>
+                <div class="info-item">
+                    <h4>Size</h4>
+                    <p id="modalSize"></p>
+                </div>
+            </div>
+
+            <div class="project-description">
+                <p id="modalDescription"></p>
+            </div>
+
+            <div class="project-features">
+                <h3 class="features-title">Key Features</h3>
+                <div class="features-list" id="modalFeatures">
+                </div>
+            </div>
+
+            <div class="project-gallery" id="modalGallery">
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Project data
+    const projects = [
+        {
+            id: 1,
+            title: "Modern Living Room",
+            category: "Residential • Living Space",
+            client: "The Anderson Family",
+            location: "Beverly Hills, CA",
+            year: "2024",
+            size: "1,200 sq ft",
+            description: "A contemporary transformation of a traditional living space into a modern sanctuary. This project seamlessly blends minimalist aesthetics with warm, inviting elements. We incorporated natural materials, custom lighting solutions, and a carefully curated color palette to create a space that feels both sophisticated and comfortable. The open-plan design maximizes natural light while maintaining distinct functional zones for entertainment and relaxation.",
+            heroImg: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=600",
+                "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600",
+                "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600"
+            ],
+            features: [
+                {icon: "💡", title: "Smart Lighting", desc: "Integrated automated lighting system"},
+                {icon: "🪟", title: "Floor-to-Ceiling Windows", desc: "Maximized natural light exposure"},
+                {icon: "🎨", title: "Custom Art Wall", desc: "Bespoke gallery wall design"},
+                {icon: "🛋️", title: "Italian Furniture", desc: "Curated luxury furniture pieces"}
+            ]
+        },
+        {
+            id: 2,
+            title: "Luxury Bedroom Suite",
+            category: "Residential • Private Quarters",
+            client: "Confidential",
+            location: "Manhattan, NY",
+            year: "2024",
+            size: "850 sq ft",
+            description: "An opulent master bedroom retreat designed for ultimate comfort and tranquility. This project showcases our expertise in creating intimate spaces that exude elegance. We focused on layered textures, ambient lighting, and a soothing color palette inspired by nature. Custom millwork, premium fabrics, and carefully selected artwork come together to create a personal sanctuary that promotes rest and rejuvenation.",
+            heroImg: "https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600",
+                "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600",
+                "https://images.unsplash.com/photo-1631889993959-41b4e9c6e3c5?w=600"
+            ],
+            features: [
+                {icon: "🌙", title: "Blackout System", desc: "Automated blackout window treatments"},
+                {icon: "🔇", title: "Acoustic Panels", desc: "Sound-dampening wall treatments"},
+                {icon: "🛏️", title: "Custom Headboard", desc: "Hand-crafted upholstered centerpiece"},
+                {icon: "💎", title: "Luxury Materials", desc: "Silk, velvet, and marble accents"}
+            ]
+        },
+        {
+            id: 3,
+            title: "Executive Office",
+            category: "Commercial • Workspace",
+            client: "Tech Innovations Inc.",
+            location: "San Francisco, CA",
+            year: "2024",
+            size: "2,000 sq ft",
+            description: "A sophisticated executive office that balances professionalism with modern design sensibilities. This space was crafted to inspire productivity while making a powerful statement. We integrated state-of-the-art technology with timeless design elements, creating an environment that impresses clients and supports executive decision-making. Rich materials, strategic lighting, and ergonomic considerations ensure both form and function excel.",
+            heroImg: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600",
+                "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600",
+                "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600"
+            ],
+            features: [
+                {icon: "📱", title: "Smart Technology", desc: "Integrated AV and control systems"},
+                {icon: "📚", title: "Library Wall", desc: "Floor-to-ceiling custom bookshelf"},
+                {icon: "🪑", title: "Ergonomic Design", desc: "Premium executive furniture"},
+                {icon: "🖼️", title: "Art Collection", desc: "Curated contemporary artwork"}
+            ]
+        },
+        {
+            id: 4,
+            title: "Elegant Dining Space",
+            category: "Residential • Dining Room",
+            client: "The Chen Family",
+            location: "Miami, FL",
+            year: "2023",
+            size: "600 sq ft",
+            description: "A refined dining room that celebrates the art of gathering and entertaining. This design creates an atmosphere of understated luxury through carefully chosen materials and proportions. A statement chandelier serves as the focal point, while custom millwork and sophisticated color choices create depth and interest. The space seamlessly connects to the kitchen while maintaining its own distinct character.",
+            heroImg: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1617104678098-de229db51175?w=600",
+                "https://images.unsplash.com/photo-1615873968403-89e068629265?w=600",
+                "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600"
+            ],
+            features: [
+                {icon: "💫", title: "Statement Lighting", desc: "Custom crystal chandelier"},
+                {icon: "🍽️", title: "Custom Table", desc: "Handcrafted dining table for 12"},
+                {icon: "🎭", title: "Accent Wall", desc: "Textured feature wall design"},
+                {icon: "🪟", title: "Garden Views", desc: "Optimized outdoor connection"}
+            ]
+        },
+        {
+            id: 5,
+            title: "Modern Kitchen",
+            category: "Residential • Culinary Space",
+            client: "The Rodriguez Family",
+            location: "Austin, TX",
+            year: "2024",
+            size: "900 sq ft",
+            description: "A contemporary kitchen that combines cutting-edge functionality with stunning aesthetics. This culinary workspace features high-end appliances seamlessly integrated into custom cabinetry. We designed multiple work zones to accommodate both everyday cooking and entertaining, with a large island serving as the heart of the space. Premium materials like quartz and stainless steel create a clean, professional aesthetic that's built to last.",
+            heroImg: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600",
+                "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?w=600",
+                "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600"
+            ],
+            features: [
+                {icon: "🔪", title: "Professional Appliances", desc: "Commercial-grade kitchen equipment"},
+                {icon: "🏝️", title: "Large Island", desc: "Multi-functional centerpiece"},
+                {icon: "💧", title: "Smart Faucets", desc: "Touchless technology"},
+                {icon: "📦", title: "Custom Storage", desc: "Maximized organization solutions"}
+            ]
+        },
+        {
+            id: 6,
+            title: "Spa-Like Bathroom",
+            category: "Residential • Wellness Space",
+            client: "The Williams Family",
+            location: "Seattle, WA",
+            year: "2023",
+            size: "450 sq ft",
+            description: "A luxurious bathroom retreat inspired by high-end resort spas. This sanctuary features premium fixtures, natural stone, and a sophisticated color palette that promotes relaxation. We incorporated a freestanding soaking tub, spacious walk-in shower with multiple shower heads, and heated floors for ultimate comfort. Ambient lighting, custom vanities, and thoughtful storage solutions complete this personal wellness haven.",
+            heroImg: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800",
+            gallery: [
+                "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600",
+                "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=600",
+                "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600"
+            ],
+            features: [
+                {icon: "🛁", title: "Soaking Tub", desc: "Freestanding sculptural centerpiece"},
+                {icon: "🚿", title: "Rain Shower", desc: "Multi-head spa shower system"},
+                {icon: "🌡️", title: "Heated Floors", desc: "Radiant floor heating system"},
+                {icon: "🪞", title: "LED Mirrors", desc: "Backlit vanity mirrors"}
+            ]
+        }
+    ];
+
+    // Open project details
+    function openProject(projectId) {
+        const project = projects.find(p => p.id === projectId);
+        if (!project) return;
+
+        document.getElementById('modalTitle').textContent = project.title;
+        document.getElementById('modalCategory').textContent = project.category;
+        document.getElementById('modalClient').textContent = project.client;
+        document.getElementById('modalLocation').textContent = project.location;
+        document.getElementById('modalYear').textContent = project.year;
+        document.getElementById('modalSize').textContent = project.size;
+        document.getElementById('modalDescription').textContent = project.description;
+        document.getElementById('modalHeroImg').src = project.heroImg;
+
+        // Add features
+        const featuresContainer = document.getElementById('modalFeatures');
+        featuresContainer.innerHTML = '';
+        project.features.forEach(feature => {
+            featuresContainer.innerHTML += `
+                    <div class="feature-item">
+                        <div class="feature-icon">${feature.icon}</div>
+                        <div class="feature-text">
+                            <h5>${feature.title}</h5>
+                            <p>${feature.desc}</p>
+                        </div>
+                    </div>
+                `;
+        });
+
+        // Add gallery images
+        const galleryContainer = document.getElementById('modalGallery');
+        galleryContainer.innerHTML = '';
+        project.gallery.forEach(img => {
+            galleryContainer.innerHTML += `<img src="${img}" alt="Gallery Image" class="gallery-img">`;
+        });
+
+        document.getElementById('projectModal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close project details
+    function closeProject() {
+        document.getElementById('projectModal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('projectModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeProject();
+        }
+    });
+
+    // Add click handlers to portfolio items
+    document.addEventListener('DOMContentLoaded', function () {
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+        portfolioItems.forEach((item, index) => {
+            item.addEventListener('click', () => openProject(index + 1));
+        });
+    });
+
     // Smooth scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {

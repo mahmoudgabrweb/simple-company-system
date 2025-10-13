@@ -2,24 +2,66 @@
     <div class="app-brand demo">
         <a href="javascript:void(0);" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <svg width="160" height="56" viewBox="0 0 160 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M90.369 49.7114H97.1425L98.2149 44.304H91.4358L90.369 49.7114Z" fill="#C4161C"/>
-                    <path d="M81.9586 49.7114H88.7321L89.8046 44.304H83.0255L81.9586 49.7114Z" fill="#C4161C"/>
-                    <path d="M69.6141 49.7114H76.3875L77.46 44.304H70.6865L69.6141 49.7114Z" fill="#C4161C"/>
-                    <path d="M30.266 24.2263H23.4869L22.4145 29.6338H29.1935L30.266 24.2263Z" fill="#C4161C"/>
-                    <path d="M31.5925 17.4642H24.8134L23.7409 22.8773H30.52L31.5925 17.4642Z" fill="#C4161C"/>
-                    <path
-                        d="M43.4686 38.3772C43.1186 40.0988 42.6614 41.239 42.0857 41.7865C41.5156 42.334 40.985 42.6106 39.7319 42.6106C39.5061 42.6106 39.286 42.5993 39.0715 42.5711C38.857 42.5429 38.6425 42.5203 38.4167 42.5034L37.3725 47.6738C38.5748 47.8318 40.0423 47.9108 41.7639 47.9108C44.2362 47.9108 46.24 47.2391 47.7753 45.9014C49.3107 44.558 50.3267 42.6445 50.829 40.1552L55.4124 17.4642H47.685L43.4573 38.3772H43.4686Z"
-                        fill="#C4161C"/>
-                    <path
-                        d="M43.1581 17.4642H35.4308L31.6376 36.2266H21.8613C19.9704 36.2266 17.5094 36.317 15.8273 36.0629C15.3588 35.9896 14.8959 35.8541 14.4895 35.6114C11.3117 33.7092 12.5083 27.9461 15.0822 25.9254C16.1716 25.073 17.69 24.486 19.6543 24.1756L20.9751 17.4698C16.5554 17.4698 13.2985 18.881 11.2326 20.9299C9.16673 22.9789 7.74431 25.5867 6.97665 29.4024C6.18641 33.3197 6.63798 36.3678 8.34263 38.5465C10.0473 40.7253 12.8131 41.8147 16.6457 41.8147H38.2417L43.1638 17.4698L43.1581 17.4642Z"
-                        fill="#C4161C"/>
-                    <path
-                        d="M145.674 17.4642L143.371 28.8492C142.869 31.3385 142.135 33.2012 141.17 34.443C140.205 35.6791 139.008 36.3 137.58 36.3C136.152 36.3 135.537 35.6057 134.859 34.2228C134.182 32.8399 134.086 30.9264 134.583 28.488L136.812 17.4586H129.085L126.782 28.8549C126.28 31.3441 125.546 33.2068 124.581 34.4486C123.615 35.6848 122.419 36.3057 120.991 36.3057C119.563 36.3057 118.897 35.5493 118.27 34.0309C117.66 32.552 117.581 30.6442 118.033 28.313L120.223 17.4755H112.496L110.193 28.8718C109.69 31.3441 108.9 33.2068 107.811 34.4486C106.721 35.6961 105.344 36.317 103.673 36.317C101.895 36.317 101.003 35.5549 100.224 34.0309C99.5357 32.6819 99.3382 30.9885 99.6374 28.9621L101.957 17.4699H94.2299L91.9269 28.8662C91.4245 31.3385 90.6343 33.2012 89.5449 34.443C88.4555 35.6904 87.0783 36.3113 85.4075 36.3113C83.6294 36.3113 82.7376 35.5493 81.953 34.0253C81.2023 32.5577 81.0443 30.6837 81.4619 28.409L83.6746 17.4642H75.9472L73.6443 28.8605C73.1419 31.3328 72.3517 33.1955 71.2623 34.4373C70.1729 35.6848 69.1794 36.3057 67.5087 36.3057C67.4917 36.3057 67.4748 36.3057 67.4579 36.3057C67.4409 36.3057 67.424 36.3057 67.4071 36.3057C62.2987 36.0178 62.6431 36.4919 64.28 28.8605L68.8408 6.28802H61.1134L56.1293 30.949C55.4124 34.4994 55.6664 37.1975 56.8969 39.0376C57.9694 40.4431 59.341 41.1487 61.3674 41.5381C62.3383 41.7244 63.3204 41.7978 64.3082 41.7978H69.4447C72.442 41.7978 74.9256 40.8777 76.9012 39.0433C78.0639 37.9595 79.0066 36.571 79.7347 34.8889L79.8815 35.6622C80.4234 37.8071 81.3491 39.365 82.6586 40.3415C83.9681 41.318 85.6615 41.8034 87.733 41.8034C90.7303 41.8034 93.2139 40.8834 95.1895 39.0489C96.3466 37.9708 97.2836 36.5879 98.0117 34.9171L98.1528 35.6622C98.6947 37.8071 99.6204 39.365 100.93 40.3415C102.239 41.318 103.933 41.8034 106.004 41.8034C109.002 41.8034 111.485 40.8834 113.461 39.0489C114.629 37.9595 115.572 36.5653 116.3 34.8776L116.441 35.6509C116.91 37.8128 117.722 39.3763 118.874 40.3528C120.025 41.3293 121.544 41.8147 123.423 41.8147C125.58 41.8147 127.425 41.3011 128.949 40.2738C130.473 39.2465 131.664 37.7055 132.534 35.6509H132.692C133.205 37.8466 134.035 39.4214 135.187 40.381C136.332 41.3406 137.941 41.8204 140.018 41.8204C142.773 41.8204 145.059 40.8834 146.882 39.0094C148.705 37.1354 149.97 34.4486 150.681 30.949L153.402 17.4755H145.674V17.4642Z"
-                        fill="#C4161C"/>
-                </svg>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+     y="0px"
+     viewBox="0 0 1000 1000" style="enable-background:new 0 0 1000 1000;" xml:space="preserve">
+<style type="text/css">
+	.st0 {
+        fill: #B89564;
+    }
+
+    .st1 {
+        fill: #1D2A3A;
+    }
+
+    .st2 {
+        font-family: 'Montserrat-Bold';
+    }
+
+    .st3 {
+        font-size: 66.46px;
+    }
+
+    .st4 {
+        fill: #FFFFFF;
+    }
+
+    .st5 {
+        font-family: 'Montserrat-SemiBold';
+    }
+
+    .st6 {
+        font-size: 21.87px;
+    }
+
+    .st7 {
+        letter-spacing: 5;
+    }
+</style>
+<polygon class="st0" points="329.2,359.2 500.7,260.3 672,359.1 672,386.3 500.7,287.4 329.2,386.4 "/>
+<path class="st0" d="M548.8,413.3h83.5v113.8l-23.5,13.6v-53.8l-36.4,21v53.8l-23.5,13.6L548.8,413.3L548.8,413.3z M572.3,480.7
+	l36.4-21v-22.9h-36.4V480.7z"/>
+<polygon class="st0" points="488.8,596.2 488.8,413.3 512.4,413.3 512.4,596.3 500.6,603.1 "/>
+<path class="st0" d="M428.9,561.7v-53.8l-36.4-21v53.8L368.9,527V413.3h83.5v162L428.9,561.7L428.9,561.7z M392.5,459.7l36.4,21v-44
+	h-36.4V459.7z"/>
+<g>
+	<rect x="470.9" y="329.3" class="st1" width="23.5" height="23.5"/>
+	<rect x="506.8" y="329.3" class="st1" width="23.5" height="23.5"/>
+	<rect x="470.9" y="365.1" class="st1" width="23.5" height="23.5"/>
+	<rect x="506.8" y="365.1" class="st1" width="23.5" height="23.5"/>
+</g>
+<text transform="matrix(1 0 0 1 301 687.38)" class="st0 st2 st3">AIA</text>
+<text transform="matrix(1 0 0 1 428 687.38)" class="st4 st2 st3"> </text>
+<text transform="matrix(1 0 0 1 447.34 687.38)" class="st1 st5 st3">Interior</text>
+<text transform="matrix(1 0 0 1 330.9134 733.95)" class="st1 st5 st6 st7">FITOUT - LANDSCAPE</text>
+<g>
+	<rect x="679.5" y="724.8" class="st0" width="19.5" height="2.8"/>
+	<rect x="301" y="724.8" class="st0" width="19.5" height="2.8"/>
+</g>
+</svg>
+
             </span>
-            <span class="app-brand-text demo menu-text fw-bold">Cipart</span>
+            <span class="app-brand-text demo menu-text fw-bold">KAME</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -32,50 +74,50 @@
 
     <ul class="menu-inner py-1">
         {!! renderAdminMenu() !!}
-{{--        @foreach (menu('admin', '_json') as $menu_item)--}}
-{{--            @php--}}
-{{--                $submenu = $menu_item->children;--}}
-{{--                $hasChildren = count($submenu) >= 1;--}}
-{{--                $isOpen = '';--}}
-{{--                $isActive = '';--}}
+        {{--        @foreach (menu('admin', '_json') as $menu_item)--}}
+        {{--            @php--}}
+        {{--                $submenu = $menu_item->children;--}}
+        {{--                $hasChildren = count($submenu) >= 1;--}}
+        {{--                $isOpen = '';--}}
+        {{--                $isActive = '';--}}
 
-{{--                if ($hasChildren) {--}}
-{{--                    foreach ($submenu as $child) {--}}
-{{--                        if (checkIfOneMenuItemActive($child) === 'active') {--}}
-{{--                            $isOpen = 'open';--}}
-{{--                            break;--}}
-{{--                        }--}}
-{{--                    }--}}
-{{--                }--}}
+        {{--                if ($hasChildren) {--}}
+        {{--                    foreach ($submenu as $child) {--}}
+        {{--                        if (checkIfOneMenuItemActive($child) === 'active') {--}}
+        {{--                            $isOpen = 'open';--}}
+        {{--                            break;--}}
+        {{--                        }--}}
+        {{--                    }--}}
+        {{--                }--}}
 
-{{--                $isActive = !$hasChildren && checkIfOneMenuItemActive($menu_item) === 'active' ? 'active' : '';--}}
-{{--            @endphp--}}
+        {{--                $isActive = !$hasChildren && checkIfOneMenuItemActive($menu_item) === 'active' ? 'active' : '';--}}
+        {{--            @endphp--}}
 
-{{--            @if ($hasChildren)--}}
-{{--                <li class="menu-item {{ $isOpen }}">--}}
-{{--                    <a href="javascript:void(0);" class="menu-link menu-toggle">--}}
-{{--                        <i class="menu-icon tf-icons ti ti-smart-home"></i>--}}
-{{--                        <div data-i18n="{{ $menu_item->title }}">{{ $menu_item->title }}</div>--}}
-{{--                    </a>--}}
-{{--                    <ul class="menu-sub">--}}
-{{--                        @foreach ($submenu as $item)--}}
-{{--                            <li class="menu-item {{ checkIfOneMenuItemActive($item) }}">--}}
-{{--                                <a href="{{ $item->href }}" class="menu-link">--}}
-{{--                                    <div data-i18n="{{ $item->title }}">{{ $item->title }}</div>--}}
-{{--                                </a>--}}
-{{--                            </li>--}}
-{{--                        @endforeach--}}
-{{--                    </ul>--}}
-{{--                </li>--}}
-{{--            @else--}}
-{{--                <li class="menu-item {{ $isActive }}">--}}
-{{--                    <a href="{{ $menu_item->href }}" class="menu-link">--}}
-{{--                        <i class="menu-icon tf-icons ti ti-mail"></i>--}}
-{{--                        <div data-i18n="{{ $menu_item->title }}">{{ $menu_item->title }}</div>--}}
-{{--                    </a>--}}
-{{--                </li>--}}
-{{--            @endif--}}
-{{--        @endforeach--}}
+        {{--            @if ($hasChildren)--}}
+        {{--                <li class="menu-item {{ $isOpen }}">--}}
+        {{--                    <a href="javascript:void(0);" class="menu-link menu-toggle">--}}
+        {{--                        <i class="menu-icon tf-icons ti ti-smart-home"></i>--}}
+        {{--                        <div data-i18n="{{ $menu_item->title }}">{{ $menu_item->title }}</div>--}}
+        {{--                    </a>--}}
+        {{--                    <ul class="menu-sub">--}}
+        {{--                        @foreach ($submenu as $item)--}}
+        {{--                            <li class="menu-item {{ checkIfOneMenuItemActive($item) }}">--}}
+        {{--                                <a href="{{ $item->href }}" class="menu-link">--}}
+        {{--                                    <div data-i18n="{{ $item->title }}">{{ $item->title }}</div>--}}
+        {{--                                </a>--}}
+        {{--                            </li>--}}
+        {{--                        @endforeach--}}
+        {{--                    </ul>--}}
+        {{--                </li>--}}
+        {{--            @else--}}
+        {{--                <li class="menu-item {{ $isActive }}">--}}
+        {{--                    <a href="{{ $menu_item->href }}" class="menu-link">--}}
+        {{--                        <i class="menu-icon tf-icons ti ti-mail"></i>--}}
+        {{--                        <div data-i18n="{{ $menu_item->title }}">{{ $menu_item->title }}</div>--}}
+        {{--                    </a>--}}
+        {{--                </li>--}}
+        {{--            @endif--}}
+        {{--        @endforeach--}}
     </ul>
 
     {{-- {!! generateMenu() !!} --}}

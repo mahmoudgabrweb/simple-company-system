@@ -19,16 +19,34 @@ class ExpenseController extends MainController
     }
 
     // Voyager: GET voyager.expenses.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
 
+        $spentAt = $request->get('spent_at');
+
+        $expenses = Expense::query()
+            ->with([
+                'type:id,name',          // if relation exists
+                'creator:id,name',       // if relation exists (e.g., belongsTo User as creator)
+            ])
+            ->when($spentAt, function ($q) use ($spentAt) {
+                $q->whereDate('spent_at', $spentAt);
+            })
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        // Stats (respecting the same filter so numbers match table)
+        $statsQuery = Expense::query()
+            ->when($spentAt, fn($q) => $q->whereDate('spent_at', $spentAt));
+
         $stats = [
-            'total' => Expense::count(),
-            'amount' => (float)Expense::sum('amount'),
+            'total'  => (clone $statsQuery)->count(),
+            'amount' => (clone $statsQuery)->sum('amount'),
         ];
 
-        return view('admin.expenses.index', compact('stats'));
+        return view('admin.expenses.index', compact('expenses', 'stats'));
     }
 
     // Custom: GET /admin/expenses/load

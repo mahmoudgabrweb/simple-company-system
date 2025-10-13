@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/v2', function () {
+    return view('welcome');
+});
+
 Route::group(['prefix' => 'admin', "middleware" => ['company.context']], function () {
     Route::get('/admin/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'select'])
         ->name('admin.company.select')->middleware(['web', 'auth']);
@@ -76,6 +80,18 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
 
     Route::get('projects/{project}/financials', [\App\Http\Controllers\Admin\ProjectFinanceController::class, 'financials'])
         ->name('voyager.projects.financials');
+
+    Route::name('voyager.')->group(function () {
+        Route::prefix('projects/{project}')->group(function () {
+            Route::get('variations', [\App\Http\Controllers\Admin\VariationController::class, 'index'])->name('projects.variations.index');
+            Route::get('variations/create', [\App\Http\Controllers\Admin\VariationController::class, 'create'])->name('projects.variations.create');
+            Route::post('variations', [\App\Http\Controllers\Admin\VariationController::class, 'store'])->name('projects.variations.store');
+            Route::get('variations/{variation}', [\App\Http\Controllers\Admin\VariationController::class, 'show'])->name('projects.variations.show');
+            Route::get('variations/{variation}/edit', [\App\Http\Controllers\Admin\VariationController::class, 'edit'])->name('projects.variations.edit');
+            Route::put('variations/{variation}', [\App\Http\Controllers\Admin\VariationController::class, 'update'])->name('projects.variations.update');
+            Route::delete('variations/{variation}', [\App\Http\Controllers\Admin\VariationController::class, 'destroy'])->name('projects.variations.destroy');
+        });
+    });
 
     Voyager::routes();
 });

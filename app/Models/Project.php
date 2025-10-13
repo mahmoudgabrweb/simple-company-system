@@ -34,6 +34,16 @@ class Project extends Model
         return $this->hasMany(Quotation::class);
     }
 
+    public function payments()
+    {
+        return $this->hasMany(\App\Models\Payment::class);
+    }
+
+    public function variations()
+    {
+        return $this->hasMany(\App\Models\Variation::class);
+    }
+
     public function activeQuotation()
     {
         return $this->hasOne(Quotation::class)->where('is_active', true);

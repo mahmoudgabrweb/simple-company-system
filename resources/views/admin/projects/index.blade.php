@@ -3,33 +3,38 @@
 @section('content')
     <div class="container-xxl py-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="m-0">المشاريع</h4>
+            <h4 class="m-0">Projects</h4>
             <a href="{{ route('voyager.projects.create') }}" class="btn btn-primary">
-                <i class="bx bx-plus"></i> إضافة مشروع
+                <i class="bx bx-plus"></i> Add Project
             </a>
         </div>
 
-        {{-- بحث بسيط --}}
+        {{-- Simple search --}}
         <form method="get" class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-md-6">
-                    <label class="form-label">بحث</label>
+                    <label class="form-label">Search</label>
                     <input type="text" name="q" value="{{ request('q') }}" class="form-control"
-                           placeholder="اسم المشروع / العنوان">
+                           placeholder="Project name / address">
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-secondary w-100">بحث</button>
+                    <button class="btn btn-secondary w-100">Search</button>
                 </div>
             </div>
         </form>
 
         @if($projects->count() === 0)
-            <div class="card p-4 text-center text-muted">لا توجد مشاريع.</div>
+            <div class="card p-4 text-center text-muted">No projects found.</div>
         @else
             @foreach($projects as $p)
                 @php
-                    // $finance passed from controller: ['total','paid','exp','remaining']
-                    $f = $finance[$p->id] ?? ['total'=>0,'paid'=>0,'exp'=>0,'remaining'=>0];
+                    $f = $finance[$p->id] ?? [];
+                    $totalQuotation = (float)($f['totalQuotation'] ?? 0);
+                    $paid           = (float)($f['paid'] ?? 0);
+                    $exp            = (float)($f['exp'] ?? 0);
+                    $varsAll        = (float)($f['varsAll'] ?? 0);
+                    $varsAccepted   = (float)($f['varsAccepted'] ?? 0);
+                    $remaining      = (float)($f['remaining'] ?? (($totalQuotation + $varsAccepted) - $paid));
                 @endphp
 
                 <div class="card p-3 mb-3">
@@ -37,47 +42,81 @@
                         <div>
                             <h5 class="m-0">{{ $p->name }}</h5>
                             <div class="text-muted small">
-                                عميل: {{ $p->client->name ?? '—' }}
-                                · مدينة: {{ $p->city->name ?? '—' }}
-                                · العنوان: {{ $p->address ?? '—' }}
+                                Client: {{ $p->client->name ?? '—' }}
+                                · City: {{ $p->city->name ?? '—' }}
+                                · Address: {{ $p->address ?? '—' }}
                             </div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('voyager.projects.financials', $p->id) }}" class="btn btn-outline-primary">
-                                تفاصيل الدفعات والمصروفات
+
+                        <div class="d-flex flex-wrap gap-2">
+                            {{-- Show (project details) --}}
+                            <a href="{{ route('voyager.projects.show', $p->id) }}" class="btn btn-outline-secondary">
+                                Show
                             </a>
-                            <a href="{{ route('voyager.projects.edit', $p->id) }}" class="btn btn-warning">تعديل</a>
+
+                            {{-- Variations (module index for this project) --}}
+                            <a href="{{ route('voyager.projects.variations.index', $p->id) }}"
+                               class="btn btn-outline-primary">
+                                Variations
+                            </a>
+
+                            <a href="{{ route('voyager.projects.financials', $p->id) }}"
+                               class="btn btn-outline-primary">
+                                Payments & Expenses
+                            </a>
+                            <a href="{{ route('voyager.projects.edit', $p->id) }}" class="btn btn-warning">Edit</a>
                         </div>
                     </div>
 
-                    {{-- بطاقات: إجمالي العرض (النشط) / المدفوع / مصروفات المشروع / المتبقي --}}
+                    {{-- Cards: Active Quotation Total / Variations (All) / Variations (Accepted) / Paid / Project Expenses / Outstanding --}}
                     <div class="row g-2 mt-2">
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">إجمالي العرض (النشط)</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['total'], 2) }}</div>
+                                <div class="text-muted small">Active Quotation Total</div>
+                                <div class="fs-5 fw-bold">{{ number_format($totalQuotation, 2) }}</div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
+
+                        <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">إجمالي المدفوع</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['paid'], 2) }}</div>
+                                <div class="text-muted small">Variations (All)</div>
+                                <div class="fs-5 fw-bold">{{ number_format($varsAll, 2) }}</div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
+
+                        <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">إجمالي مصروفات المشروع</div>
-                                <div class="fs-5 fw-bold">{{ number_format($f['exp'], 2) }}</div>
+                                <div class="text-muted small">Variations (Accepted)</div>
+                                <div class="fs-5 fw-bold">{{ number_format($varsAccepted, 2) }}</div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
+
+                        <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">المتبقي</div>
-                                <div class="fs-5 fw-bold {{ $f['remaining'] < 0 ? 'text-danger' : '' }}">
-                                    {{ number_format($f['remaining'], 2) }}
+                                <div class="text-muted small">Total Paid</div>
+                                <div class="fs-5 fw-bold">{{ number_format($paid, 2) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Project Expenses</div>
+                                <div class="fs-5 fw-bold">{{ number_format($exp, 2) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Outstanding*</div>
+                                <div class="fs-5 fw-bold {{ $remaining < 0 ? 'text-danger' : '' }}">
+                                    {{ number_format($remaining, 2) }}
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="small text-muted mt-1">
+                        * Outstanding = Active Quotation Total + Accepted Variations − Total Paid.
                     </div>
                 </div>
             @endforeach

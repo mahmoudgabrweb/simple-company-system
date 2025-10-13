@@ -19,11 +19,21 @@ class ExpenseTypeController extends MainController
     }
 
     // Voyager: GET voyager.expense_types.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
+
+        $q = trim($request->get('q', ''));
+
+        $expenseTypes = ExpenseType::query()
+            ->when($q, fn($query) => $query->where('name', 'like', "%{$q}%"))
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
         $stats = ['total' => ExpenseType::count()];
-        return view('admin.expense_types.index', compact('stats'));
+
+        return view('admin.expense_types.index', compact('expenseTypes', 'stats', 'q'));
     }
 
     // Custom: GET /admin/expense_types/load

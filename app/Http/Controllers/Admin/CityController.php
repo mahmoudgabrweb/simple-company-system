@@ -20,15 +20,23 @@ class CityController extends MainController
     }
 
     // Voyager: GET voyager.cities.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
+
+        $q = trim($request->get('q', ''));
+
+        $cities = City::query()
+            ->when($q, fn($query) => $query->where('name', 'like', "%{$q}%"))
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
 
         $stats = [
             'total' => City::count(),
         ];
 
-        return view('admin.cities.index', compact('stats'));
+        return view('admin.cities.index', compact('cities', 'stats', 'q'));
     }
 
     // Custom: GET /admin/cities/load

@@ -21,21 +21,26 @@ class SalaryController extends MainController
     }
 
     // Voyager: GET voyager.salaries.index
-    public function index()
+    public function index(Request $request)
     {
         $this->checkPermission('browse');
 
-        $cid = CompanyContext::id();
+        $salaries = Salary::query()
+            ->with([
+                'employee:id,name',             // if relation exists
+                'expenseType:id,name',          // if relation exists
+            ])
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        // Stats
         $stats = [
-            'total' => Salary::query()
-                ->join('employees', 'employees.id', '=', 'salaries.employee_id')
-                ->where('employees.company_id', $cid)->count(),
-            'amount' => (float)Salary::query()
-                ->join('employees', 'employees.id', '=', 'salaries.employee_id')
-                ->where('employees.company_id', $cid)->sum('amount'),
+            'total'  => Salary::count(),
+            'amount' => Salary::sum('amount'),
         ];
 
-        return view('admin.salaries.index', compact('stats'));
+        return view('admin.salaries.index', compact('salaries', 'stats'));
     }
 
     // Custom: GET /admin/salaries/load
