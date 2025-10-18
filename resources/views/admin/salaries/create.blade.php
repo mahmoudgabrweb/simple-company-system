@@ -93,11 +93,20 @@
 
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
+                        <label class="form-label">Project</label>
+                        <select name="project_id" class="form-select">
+                            <option value="">— None —</option>
+                            @foreach($projects as $t)
+                                <option value="{{ $t->id }}" @selected(old('project_id')==$t->id)>{{ $t->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Days Count</label>
                         <input type="number" min="0" max="365" name="days_count" class="form-control"
                                value="{{ old('days_count', 0) }}">
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-4">
                         <label class="form-label">Company</label>
                         <input type="text" class="form-control"
                                value="{{ $currentCompany->name ?? 'Will be saved under the current company' }}"

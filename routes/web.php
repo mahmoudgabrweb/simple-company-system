@@ -10,7 +10,11 @@ Route::get('/', function () {
 });
 
 Route::get('/v2', function () {
-    return view('welcome');
+    return view('welcome2');
+});
+
+Route::get('/v3', function () {
+    return view('welcome3');
 });
 
 Route::group(['prefix' => 'admin', "middleware" => ['company.context']], function () {

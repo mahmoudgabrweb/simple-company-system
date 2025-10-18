@@ -7,13 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class Salary extends Model
 {
     protected $fillable = [
-        'title', 'employee_id', 'month', 'expense_type_id', 'type', 'amount', 'days_count',
+        'title', 'employee_id', 'month', 'expense_type_id', 'type', 'amount', 'days_count', 'project_id'
     ];
 
     protected $casts = [
         'month' => 'date',
         'amount' => 'decimal:2',
     ];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 
     public function employee()
     {

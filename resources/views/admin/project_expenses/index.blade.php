@@ -94,7 +94,7 @@
                             <td>
                                 @if($e->attachment_path)
                                     <a class="btn btn-sm btn-outline-secondary"
-                                       href="{{ route('admin.project_expenses.attachment', $e->id) }}">تنزيل</a>
+                                       href="{{ route('admin.project-expenses.attachment', $e->id) }}">تنزيل</a>
                                 @else
                                     —
                                 @endif

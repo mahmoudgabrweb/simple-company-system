@@ -212,7 +212,7 @@ class VariationController extends MainController
             $variation->refreshTotals();
         });
 
-        return redirect()->route('admin.projects.variations.edit', [$variation->project_id, $variation->id])
+        return redirect()->route('voyager.projects.variations.edit', [$variation->project_id, $variation->id])
             ->with('success', 'Variation updated.');
     }
 

@@ -83,9 +83,9 @@
                         <label class="form-label">Accounting Type</label>
                         <select name="expense_type_id" class="form-select">
                             <option value="">— None —</option>
-                            @foreach($types as $t)
-                                <option value="{{ $t->id }}" @selected(old('expense_type_id', $salary->expense_type_id)==$t->id)>
-                                    {{ $t->name }}
+                            @foreach($types as $tt)
+                                <option value="{{ $tt->id }}" @selected(old('expense_type_id', $salary->expense_type_id)==$tt->id)>
+                                    {{ $tt->name }}
                                 </option>
                             @endforeach
                         </select>
@@ -99,11 +99,22 @@
 
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
+                        <label class="form-label">Project</label>
+                        <select name="project_id" class="form-select">
+                            <option value="">— None —</option>
+                            @foreach($projects as $t)
+                                <option value="{{ $t->id }}" @selected(old('project_id', $salary->project_id)==$t->id)>
+                                    {{ $t->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Days Count</label>
                         <input type="number" min="0" max="365" name="days_count" class="form-control"
                                value="{{ old('days_count', $salary->days_count) }}">
                     </div>
-                    <div class="col-md-8 small text-muted">
+                    <div class="col-md-4 small text-muted">
                         Created: {{ optional($salary->created_at)->format('Y-m-d H:i') ?? '—' }} —
                         Last updated: {{ optional($salary->updated_at)->format('Y-m-d H:i') ?? '—' }}
                     </div>

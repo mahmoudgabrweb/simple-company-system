@@ -91,7 +91,7 @@
 
                 <div class="row g-3 mt-2 align-items-end">
                     <div class="col-md-4">
-                        <label class="form-label">Salary ({{ config('app.currency', 'SAR') }})</label>
+                        <label class="form-label">Salary ({{ config('app.currency', 'AED') }})</label>
                         <input type="number" step="0.01" min="0" name="salary" class="form-control"
                                value="{{ old('salary', 0) }}">
                     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Project;
 use App\Models\Salary;
 use App\Models\Employee;
 use App\Models\ExpenseType;
@@ -20,28 +21,90 @@ class SalaryController extends MainController
         $this->model = Salary::class;
     }
 
-    // Voyager: GET voyager.salaries.index
     public function index(Request $request)
     {
         $this->checkPermission('browse');
 
-        $salaries = Salary::query()
-            ->with([
-                'employee:id,name',             // if relation exists
-                'expenseType:id,name',          // if relation exists
-            ])
-            ->orderByDesc('id')
-            ->paginate(15)
-            ->withQueryString();
+        $month = trim((string)$request->get('month'));  // YYYY-MM
+        $employee_id = $request->integer('employee_id');
+        $project_id = $request->integer('project_id');
 
-        // Stats
-        $stats = [
-            'total'  => Salary::count(),
-            'amount' => Salary::sum('amount'),
+        $companyId = CompanyContext::id();
+
+        $query = Salary::with(['project', 'employee'])
+            // scope by active company via the employee relation
+            ->when($companyId, fn($q) => $q->whereHas('employee', fn($qq) => $qq->where('company_id', $companyId))
+            );
+
+        // Filters
+        if ($employee_id) {
+            $query->where('employee_id', $employee_id);
+        }
+        if ($month !== '') {
+            // your column is `month` (date), not salary_date
+            $query->whereRaw("DATE_FORMAT(`month`, '%Y-%m') = ?", [$month]);
+        }
+        if ($project_id) {
+            $query->where('project_id', $project_id);
+        }
+
+        // Totals from the SAME filtered query
+        $salaries = $query->orderByDesc('id')
+            ->paginate(20)
+            ->appends($request->query());
+
+        // Projects dropdown (use the correct name column for your schema)
+        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
+        $employees = Employee::orderBy('id', 'desc')->select('id', 'name')->get();
+
+        $sumAll = (clone $query)->reorder()->sum('amount');
+
+        $sumTypes = (clone $query)->reorder()
+            ->select('type')
+            ->selectRaw('SUM(amount) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type');
+
+        $paymentsMap = [
+            'salary' => 'salary',
+            'overtime' => 'overtime',
+            'bonus' => 'bonus',
         ];
 
-        return view('admin.salaries.index', compact('salaries', 'stats'));
+        $totalDays = (int)(clone $query)->reorder()->sum('days_count');
+
+        return view('admin.salaries.index', [
+            'salaries' => $salaries,
+            'filters' => compact('month', 'project_id', 'employee_id'),
+            'employees' => $employees,
+            'projects' => $projects,
+            'sumAll' => $sumAll,
+            'sumTypes' => $sumTypes,
+            'paymentsMap' => $paymentsMap,
+            'totalDays' => $totalDays, // optional
+        ]);
     }
+//    public function index(Request $request)
+//    {
+//        $this->checkPermission('browse');
+//
+//        $salaries = Salary::query()
+//            ->with([
+//                'employee:id,name',             // if relation exists
+//                'expenseType:id,name',          // if relation exists
+//            ])
+//            ->orderByDesc('id')
+//            ->paginate(15)
+//            ->withQueryString();
+//
+//        // Stats
+//        $stats = [
+//            'total'  => Salary::count(),
+//            'amount' => Salary::sum('amount'),
+//        ];
+//
+//        return view('admin.salaries.index', compact('salaries', 'stats'));
+//    }
 
     // Custom: GET /admin/salaries/load
     public function load(Request $request): JsonResponse
@@ -98,8 +161,9 @@ class SalaryController extends MainController
         $salary = new Salary();
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
+        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
 
-        return view('admin.salaries.create', compact('salary', 'employees', 'types'))
+        return view('admin.salaries.create', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());
     }
 
@@ -113,6 +177,7 @@ class SalaryController extends MainController
         $request->validate([
             'title' => 'required|string|max:190',
             'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
             'month' => ['required', 'date_format:Y-m'], // HTML <input type="month">
             'expense_type_id' => ['nullable', 'integer', 'exists:expense_types,id'],
             'type' => ['required', Rule::in(['salary', 'overtime', 'bonus'])],
@@ -131,7 +196,7 @@ class SalaryController extends MainController
             return back()->withErrors(['expense_type_id' => 'نوع المصروف لا ينتمي إلى الشركة الحالية'])->withInput();
         }
 
-        $data = $request->only(['title', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
+        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
         // Convert YYYY-MM -> YYYY-MM-01
         $data['month'] = $request->input('month') . '-01';
 
@@ -157,8 +222,9 @@ class SalaryController extends MainController
 
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
+        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
 
-        return view('admin.salaries.edit', compact('salary', 'employees', 'types'))
+        return view('admin.salaries.edit', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());
     }
 
@@ -172,8 +238,9 @@ class SalaryController extends MainController
         $request->validate([
             'title' => 'required|string|max:190',
             'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
             'month' => ['required', 'date_format:Y-m'],
-            'expense_type_id' => ['nullable', 'integer', 'exists:expense_types,id'],
+            'expense_type_id' => ['required', 'integer', 'exists:expense_types,id'],
             'type' => ['required', Rule::in(['salary', 'overtime', 'bonus'])],
             'amount' => 'required|numeric|min:0|max:9999999999.99',
             'days_count' => 'nullable|integer|min:0|max:365',
@@ -194,7 +261,7 @@ class SalaryController extends MainController
             ->select('salaries.*')
             ->firstOrFail();
 
-        $data = $request->only(['title', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
+        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
         $data['month'] = $request->input('month') . '-01';
 
         $salary->update($data);

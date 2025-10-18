@@ -19,6 +19,11 @@ class Project extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function salaries()
+    {
+        return $this->hasMany(Salary::class);
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);
