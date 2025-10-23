@@ -32,6 +32,7 @@ class EmployeeController extends MainController
 
         $employees = Employee::query()
             ->with(['job' => fn($q) => $q->select('id', 'title')]) // if relation exists
+            ->where("company_id", CompanyContext::id())
             ->when($q, function ($query) use ($q) {
                 $query->where(function ($inner) use ($q) {
                     $inner->where('name', 'like', "%{$q}%")
@@ -44,13 +45,19 @@ class EmployeeController extends MainController
             ->withQueryString();
 
         $stats = [
-            'total'    => Employee::count(),
-            'active'   => Employee::when(function ($q) {
+            'total' => Employee::count(),
+            'active' => Employee::when(function ($q) {
                 // only count if column exists; fall back to 0 if not
-                try { $q->where('is_active', 1); } catch (\Throwable $e) {}
+                try {
+                    $q->where('is_active', 1);
+                } catch (\Throwable $e) {
+                }
             })->count(),
             'inactive' => Employee::when(function ($q) {
-                try { $q->where('is_active', 0); } catch (\Throwable $e) {}
+                try {
+                    $q->where('is_active', 0);
+                } catch (\Throwable $e) {
+                }
             })->count(),
         ];
 
@@ -64,6 +71,7 @@ class EmployeeController extends MainController
 
         $q = Employee::query()
             ->with('job:id,title')
+            ->where("company_id", CompanyContext::id())
             ->select(['id', 'name', 'phone', 'email', 'job_id', 'start_at', 'end_at', 'salary', 'created_at']);
 
         return DataTables::of($q)
@@ -108,7 +116,7 @@ class EmployeeController extends MainController
         $this->checkPermission('add');
 
         $employee = new Employee();
-        $jobs = Job::orderBy('title')->get(['id', 'title']);
+        $jobs = Job::where("company_id", CompanyContext::id())->orderBy('title')->get(['id', 'title']);
 
         return view('admin.employees.create', compact('employee', 'jobs'))
             ->with('currentCompany', CompanyContext::company());
@@ -159,7 +167,7 @@ class EmployeeController extends MainController
         $this->checkPermission('edit');
 
         $employee = Employee::findOrFail($id);
-        $jobs = Job::orderBy('title')->get(['id', 'title']);
+        $jobs = Job::where("company_id", CompanyContext::id())->orderBy('title')->get(['id', 'title']);
 
         return view('admin.employees.edit', compact('employee', 'jobs'))
             ->with('currentCompany', CompanyContext::company());

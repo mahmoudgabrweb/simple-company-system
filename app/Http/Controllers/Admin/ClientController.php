@@ -28,6 +28,7 @@ class ClientController extends MainController
 
         $clients = Client::query()
             ->with(['city' => fn($q) => $q->select('id', 'name')]) // if relation exists
+            ->where("company_id", CompanyContext::id())
             ->when($q, function ($query) use ($q) {
                 $query->where(function ($inner) use ($q) {
                     $inner->where('name', 'like', "%{$q}%")
@@ -54,6 +55,7 @@ class ClientController extends MainController
 
         $q = Client::query()
             ->with('city:id,name')
+            ->where("company_id", CompanyContext::id())
             ->select(['id', 'name', 'phone', 'alternative_phone', 'email', 'city_id', 'address', 'created_at']);
 
         $module = $this->moduleName; // 'clients'
@@ -90,7 +92,7 @@ class ClientController extends MainController
 
         $client = new Client();
         // Cities are company-scoped via BelongsToCompany global scope
-        $cities = City::orderBy('name')->get(['id', 'name']);
+        $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
         return view('admin.clients.create', compact('client', 'cities'))
             ->with('currentCompany', CompanyContext::company());
@@ -133,7 +135,7 @@ class ClientController extends MainController
         $this->checkPermission('edit');
 
         $client = Client::findOrFail($id);
-        $cities = City::orderBy('name')->get(['id', 'name']);
+        $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
         return view('admin.clients.edit', compact('client', 'cities'))
             ->with('currentCompany', CompanyContext::company());

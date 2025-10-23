@@ -54,8 +54,8 @@ class SalaryController extends MainController
             ->appends($request->query());
 
         // Projects dropdown (use the correct name column for your schema)
-        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
-        $employees = Employee::orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = Project::where("company_id", CompanyContext::id())->orderBy('id', 'desc')->select('id', 'name')->get();
+        $employees = Employee::where("company_id", CompanyContext::id())->orderBy('id', 'desc')->select('id', 'name')->get();
 
         $sumAll = (clone $query)->reorder()->sum('amount');
 
@@ -117,6 +117,7 @@ class SalaryController extends MainController
             ->with(['employee:id,name', 'expenseType:id,name'])
             ->select(['salaries.id', 'salaries.title', 'salaries.employee_id', 'salaries.month', 'salaries.type', 'salaries.amount', 'salaries.days_count', 'salaries.created_at'])
             ->join('employees', 'employees.id', '=', 'salaries.employee_id')
+            ->where("salaries.company_id", CompanyContext::id())
             ->where('employees.company_id', $cid);
 
         $module = $this->moduleName;
@@ -161,7 +162,7 @@ class SalaryController extends MainController
         $salary = new Salary();
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
-        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = Project::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
 
         return view('admin.salaries.create', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());
@@ -222,7 +223,7 @@ class SalaryController extends MainController
 
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
-        $projects = Project::orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = Project::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
 
         return view('admin.salaries.edit', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());
@@ -257,6 +258,7 @@ class SalaryController extends MainController
         $salary = Salary::query()
             ->join('employees', 'employees.id', '=', 'salaries.employee_id')
             ->where('employees.company_id', $cid)
+            ->where('salaries.company_id', $cid)
             ->where('salaries.id', $id)
             ->select('salaries.*')
             ->firstOrFail();

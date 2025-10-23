@@ -18,9 +18,9 @@ Route::get('/v3', function () {
 });
 
 Route::group(['prefix' => 'admin', "middleware" => ['company.context']], function () {
-    Route::get('/admin/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'select'])
+    Route::get('/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'select'])
         ->name('admin.company.select')->middleware(['web', 'auth']);
-    Route::post('/admin/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'store'])
+    Route::post('/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'store'])
         ->name('admin.company.set')->middleware(['web', 'auth']);
 
     Route::name('voyager.')->group(function () {
@@ -82,6 +82,9 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
     Route::get('project-expenses/{id}/attachment', [\App\Http\Controllers\Admin\ProjectExpenseController::class, 'download'])
         ->name('admin.project-expenses.attachment');
 
+    Route::get('supplier_materials/{id}/attachment', [\App\Http\Controllers\Admin\SupplierMaterialController::class, 'download'])
+        ->name('voyager.supplier_materials.download');
+
     Route::get('projects/{project}/financials', [\App\Http\Controllers\Admin\ProjectFinanceController::class, 'financials'])
         ->name('voyager.projects.financials');
 
@@ -96,6 +99,9 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
             Route::delete('variations/{variation}', [\App\Http\Controllers\Admin\VariationController::class, 'destroy'])->name('projects.variations.destroy');
         });
     });
+    Route::get('/', fn() => redirect()->route('voyager.projects.index'))
+        ->name('voyager.dashboard');
 
     Voyager::routes();
+
 });

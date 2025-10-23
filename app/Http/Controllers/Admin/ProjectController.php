@@ -31,6 +31,7 @@ class ProjectController extends MainController
         $q = trim($request->get('q', ''));
 
         $projects = \App\Models\Project::with(['client:id,name', 'city:id,name'])
+            ->where("company_id", CompanyContext::id())
             ->when($q, function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
                     $w->where('name', 'like', "%$q%")
@@ -272,6 +273,7 @@ class ProjectController extends MainController
         $this->checkPermission('browse');
 
         $q = Project::query()
+            ->where("company_id", CompanyContext::id())
             ->with(['client:id,name', 'city:id,name'])
             ->select(['id', 'name', 'client_id', 'city_id', 'address', 'created_at']);
 
@@ -307,8 +309,8 @@ class ProjectController extends MainController
         $this->checkPermission('add');
 
         $project = new Project();
-        $clients = Client::orderBy('name')->get(['id', 'name']);
-        $cities = City::orderBy('name')->get(['id', 'name']);
+        $clients = Client::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
+        $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
         return view('admin.projects.create', compact('project', 'clients', 'cities'))
             ->with('currentCompany', CompanyContext::company());
@@ -345,8 +347,8 @@ class ProjectController extends MainController
         $this->checkPermission('edit');
 
         $project = Project::findOrFail($id);
-        $clients = Client::orderBy('name')->get(['id', 'name']);
-        $cities = City::orderBy('name')->get(['id', 'name']);
+        $clients = Client::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
+        $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
         return view('admin.projects.edit', compact('project', 'clients', 'cities'))
             ->with('currentCompany', CompanyContext::company());

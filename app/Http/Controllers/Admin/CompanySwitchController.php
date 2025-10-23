@@ -20,6 +20,6 @@ class CompanySwitchController extends Controller
     {
         $request->validate(['company_id' => 'required|exists:companies,id']);
         CompanyContext::set((int)$request->company_id);
-        return redirect()->route('voyager.dashboard'); // or your admin home
+        return redirect()->route('voyager.projects.index'); // or your admin home
     }
 }

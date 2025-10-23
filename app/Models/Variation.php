@@ -10,7 +10,7 @@ class Variation extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'project_id', 'quotation_id', 'code', 'title', 'notes', 'status', 'currency', 'valid_until',
+        'company_id', 'project_id', 'quotation_id', 'code', 'title', 'notes', 'status', 'currency', 'valid_until',
         'subtotal', 'tax', 'total',
     ];
 
@@ -21,6 +21,11 @@ class Variation extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function milestones()
+    {
+        return $this->morphMany(Milestone::class, 'milestonable');
     }
 
     public function quotation()

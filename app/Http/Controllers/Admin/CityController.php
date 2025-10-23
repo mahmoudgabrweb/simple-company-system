@@ -27,6 +27,7 @@ class CityController extends MainController
         $q = trim($request->get('q', ''));
 
         $cities = City::query()
+            ->where("company_id", CompanyContext::id())
             ->when($q, fn($query) => $query->where('name', 'like', "%{$q}%"))
             ->orderByDesc('id')
             ->paginate(15)
@@ -44,7 +45,8 @@ class CityController extends MainController
     {
         $this->checkPermission('browse');
 
-        $q = City::query()->select(['id', 'name', 'created_at']);
+        $q = City::query()->where("company_id", CompanyContext::id())
+            ->select(['id', 'name', 'created_at']);
         $module = $this->moduleName;
 
         return DataTables::of($q)

@@ -30,6 +30,7 @@ class ExpenseController extends MainController
                 'type:id,name',          // if relation exists
                 'creator:id,name',       // if relation exists (e.g., belongsTo User as creator)
             ])
+            ->where("company_id", CompanyContext::id())
             ->when($spentAt, function ($q) use ($spentAt) {
                 $q->whereDate('spent_at', $spentAt);
             })
@@ -39,10 +40,11 @@ class ExpenseController extends MainController
 
         // Stats (respecting the same filter so numbers match table)
         $statsQuery = Expense::query()
+            ->where("company_id", CompanyContext::id())
             ->when($spentAt, fn($q) => $q->whereDate('spent_at', $spentAt));
 
         $stats = [
-            'total'  => (clone $statsQuery)->count(),
+            'total' => (clone $statsQuery)->count(),
             'amount' => (clone $statsQuery)->sum('amount'),
         ];
 
@@ -55,8 +57,9 @@ class ExpenseController extends MainController
         $this->checkPermission('browse');
 
         $q = Expense::query()
-            ->with(['type:id,name','creator:id,name'])
-            ->select(['id','title','amount','expense_type_id','created_by','spent_at','created_at']);
+            ->with(['type:id,name', 'creator:id,name'])
+            ->where("company_id", CompanyContext::id())
+            ->select(['id', 'title', 'amount', 'expense_type_id', 'created_by', 'spent_at', 'created_at']);
 
         // Optional filter by a specific day
         if ($request->filled('spent_at')) {
@@ -68,7 +71,7 @@ class ExpenseController extends MainController
         return DataTables::of($q)
             ->addIndexColumn()
             ->addColumn('type', fn($r) => $r->type?->name ?? '—')
-            ->addColumn('by',   fn($r) => $r->creator?->name ?? '—')
+            ->addColumn('by', fn($r) => $r->creator?->name ?? '—')
             ->editColumn('amount', fn($r) => number_format((float)$r->amount, 2))
             ->addColumn('spent_at', fn($r) => optional($r->spent_at)->format('Y-m-d') ?? '—')
             ->editColumn('created_at', fn($r) => $r->created_at?->format('Y-m-d H:i'))
@@ -76,23 +79,25 @@ class ExpenseController extends MainController
                 $u = auth()->user();
                 $btns = '';
                 if ($u->hasPermission("edit_{$module}")) {
-                    $btns .= "<a href='".route("voyager.$module.edit", $r->id)."' class='btn btn-sm btn-warning'>تعديل</a> ";
+                    $btns .= "<a href='" . route("voyager.$module.edit", $r->id) . "' class='btn btn-sm btn-warning'>تعديل</a> ";
                 }
                 if ($u->hasPermission("delete_{$module}")) {
-                    $btns .= "<a href='javascript:void(0);' data-url='".route("voyager.$module.destroy", $r->id)."' data-id='{$r->id}' class='delete-record btn btn-sm btn-danger'>حذف</a>";
+                    $btns .= "<a href='javascript:void(0);' data-url='" . route("voyager.$module.destroy", $r->id) . "' data-id='{$r->id}' class='delete-record btn btn-sm btn-danger'>حذف</a>";
                 }
                 return $btns ?: '—';
             })
             ->rawColumns(['actions'])
             ->make();
     }
+
     // Voyager: GET voyager.expenses.create
     public function create()
     {
         $this->checkPermission('add');
 
         $expense = new Expense();
-        $types = ExpenseType::orderBy('name')->get(['id', 'name']);
+        $types = ExpenseType::where("company_id", CompanyContext::id())
+            ->orderBy('name')->get(['id', 'name']);
 
         return view('admin.expenses.create', compact('expense', 'types'))
             ->with('currentCompany', CompanyContext::company());
@@ -104,14 +109,14 @@ class ExpenseController extends MainController
         $this->checkPermission('add');
 
         $request->validate([
-            'title'           => 'required|string|max:190',
-            'amount'          => 'required|numeric|min:0|max:9999999999.99',
-            'description'     => 'nullable|string',
-            'spent_at'        => 'nullable|date', // NEW
-            'expense_type_id' => ['required','integer','exists:expense_types,id'],
+            'title' => 'required|string|max:190',
+            'amount' => 'required|numeric|min:0|max:9999999999.99',
+            'description' => 'nullable|string',
+            'spent_at' => 'nullable|date', // NEW
+            'expense_type_id' => ['required', 'integer', 'exists:expense_types,id'],
         ]);
 
-        Expense::create($request->only(['title','amount','description','spent_at','expense_type_id']));
+        Expense::create($request->only(['title', 'amount', 'description', 'spent_at', 'expense_type_id']));
 
         return redirect()->route('voyager.expenses.index')
             ->with(['message' => 'تم إنشاء المصروف بنجاح', 'alert-type' => 'success']);
@@ -123,7 +128,7 @@ class ExpenseController extends MainController
         $this->checkPermission('edit');
 
         $expense = Expense::findOrFail($id);
-        $types = ExpenseType::orderBy('name')->get(['id', 'name']);
+        $types = ExpenseType::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
         return view('admin.expenses.edit', compact('expense', 'types'))
             ->with('currentCompany', CompanyContext::company());
@@ -135,15 +140,15 @@ class ExpenseController extends MainController
         $this->checkPermission('edit');
 
         $request->validate([
-            'title'           => 'required|string|max:190',
-            'amount'          => 'required|numeric|min:0|max:9999999999.99',
-            'description'     => 'nullable|string',
-            'spent_at'        => 'nullable|date', // NEW
-            'expense_type_id' => ['required','integer','exists:expense_types,id'],
+            'title' => 'required|string|max:190',
+            'amount' => 'required|numeric|min:0|max:9999999999.99',
+            'description' => 'nullable|string',
+            'spent_at' => 'nullable|date', // NEW
+            'expense_type_id' => ['required', 'integer', 'exists:expense_types,id'],
         ]);
 
         $expense = Expense::findOrFail($id);
-        $expense->update($request->only(['title','amount','description','spent_at','expense_type_id']));
+        $expense->update($request->only(['title', 'amount', 'description', 'spent_at', 'expense_type_id']));
 
         return redirect()->route('voyager.expenses.index')
             ->with(['message' => 'تم تحديث المصروف بنجاح', 'alert-type' => 'success']);

@@ -26,6 +26,7 @@ class ExpenseTypeController extends MainController
         $q = trim($request->get('q', ''));
 
         $expenseTypes = ExpenseType::query()
+            ->where("company_id", CompanyContext::id())
             ->when($q, fn($query) => $query->where('name', 'like', "%{$q}%"))
             ->orderByDesc('id')
             ->paginate(15)
@@ -41,7 +42,7 @@ class ExpenseTypeController extends MainController
     {
         $this->checkPermission('browse');
 
-        $q = ExpenseType::query()->select(['id', 'name', 'created_at']);
+        $q = ExpenseType::query()->where("company_id", CompanyContext::id())->select(['id', 'name', 'created_at']);
         $module = $this->moduleName;
 
         return DataTables::of($q)

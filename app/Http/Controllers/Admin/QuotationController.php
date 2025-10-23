@@ -22,7 +22,9 @@ class QuotationController extends Controller
     public function index()
     {
         $this->authorize('browse', app(Quotation::class)); // Voyager policy check (optional)
-        $quotations = Quotation::with('project')->latest()->paginate(20);
+        $quotations = Quotation::with('project')
+            ->where("company_id", CompanyContext::id())
+            ->latest()->paginate(20);
         return view('admin.quotations.index', compact('quotations'));
     }
 
@@ -30,18 +32,9 @@ class QuotationController extends Controller
     public function create()
     {
         $this->authorize('add', app(Quotation::class));
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::where("company_id", CompanyContext::id())->orderBy('name')->get();
         return view('admin.quotations.create', compact('projects'))
             ->with('currentCompany', CompanyContext::company());
-    }
-
-    private function active_company_id(): ?int
-    {
-        // whichever you used in Projects:
-        // return session('active_company_id');
-        // or return auth()->user()->company_id;
-        // or return app('company')->id;
-        return session('active_company_id');
     }
 
     // Create quotation (auto-inject static sections is handled by observer)
@@ -78,8 +71,8 @@ class QuotationController extends Controller
     public function edit(int $id)
     {
         $this->authorize('edit', app(Quotation::class));
-        $quotation = Quotation::with(['project', 'sections.allItems.unit'])->findOrFail($id);
-        $units = Unit::where('is_active', 1)->orderBy('code')->get();
+        $quotation = Quotation::where("company_id", CompanyContext::id())->with(['project', 'sections.allItems.unit'])->findOrFail($id);
+        $units = Unit::orderBy('code')->get();
         return view('admin.quotations.edit', compact('quotation', 'units'));
     }
 

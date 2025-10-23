@@ -40,7 +40,7 @@ class PaymentController extends Controller
         $payments = $q->paginate(20)->appends($request->query());
 
         $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
-        $methods = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة'];
+        $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 
         return view('admin.payments.index', compact('payments', 'projects', 'methods'));
     }
@@ -52,7 +52,7 @@ class PaymentController extends Controller
         $companyId = CompanyContext::id();
         $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
         $employees = Employee::where('company_id', $companyId)->orderBy('name')->get();
-        $methods = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة'];
+        $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 
         return view('admin.payments.create', compact('projects', 'employees', 'methods'));
     }
@@ -113,7 +113,7 @@ class PaymentController extends Controller
         $payment = Payment::where('company_id', $companyId)->with(['project', 'receiver'])->findOrFail($id);
         $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
         $employees = Employee::where('company_id', $companyId)->orderBy('name')->get();
-        $methods = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة'];
+        $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 
         return view('admin.payments.edit', compact('payment', 'projects', 'employees', 'methods'));
     }

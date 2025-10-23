@@ -1,8 +1,7 @@
-{{-- resources/views/vendor/voyager/dashboard-cipart.blade.php --}}
-@extends('voyager::master')
+@extends('admin.main')
 
 @section('content')
-    Hi
+
 @endsection
 
 @section('javascript')

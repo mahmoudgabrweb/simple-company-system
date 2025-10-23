@@ -37,6 +37,7 @@ class JobController extends MainController
         $status = $request->get('status'); // 'active' | 'inactive' | null
 
         $jobs = \App\Models\Job::query()
+            ->where("company_id", CompanyContext::id())
             ->when($q !== '', function ($builder) use ($q) {
                 $builder->where(function ($w) use ($q) {
                     $w->where('title', 'like', "%{$q}%")
@@ -58,7 +59,9 @@ class JobController extends MainController
     {
         $this->checkPermission('browse');
 
-        $q = Job::query()->select(['id', 'title', 'description', 'is_active', 'created_at']);
+        $q = Job::query()
+            ->where("company_id", CompanyContext::id())
+            ->select(['id', 'title', 'description', 'is_active', 'created_at']);
 
         return DataTables::of($q)
             ->addIndexColumn()

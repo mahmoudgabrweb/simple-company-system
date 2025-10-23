@@ -24,6 +24,11 @@ class Quotation extends Model
         return $this->hasMany(QuotationSection::class)->orderBy('order');
     }
 
+    public function milestones()
+    {
+        return $this->morphMany(Milestone::class, 'milestonable');
+    }
+
     public function project()
     {
         return $this->belongsTo(Project::class);

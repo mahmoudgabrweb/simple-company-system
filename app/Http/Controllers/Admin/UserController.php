@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\CompanyContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -95,6 +96,7 @@ class UserController extends Controller
         $user->name  = $data['name'];
         $user->email = $data['email'];
         $user->password = Hash::make($data['password']);
+        $user->company_id = CompanyContext::id();
 
         if (Schema::hasColumn($user->getTable(), 'is_active')) {
             $user->is_active = (bool)($data['is_active'] ?? true);
@@ -152,6 +154,9 @@ class UserController extends Controller
 
         $user->name  = $data['name'];
         $user->email = $data['email'];
+        if ($user && !$user->hasRole('super_admin')) {
+            $user->company_id = CompanyContext::id();
+        }
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
