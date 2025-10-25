@@ -32,7 +32,8 @@
                     $totalQuotation = (float)($f['totalQuotation'] ?? 0);
                     $paid           = (float)($f['paid'] ?? 0);
                     $exp            = (float)($f['exp'] ?? 0);
-                    $varsAll        = (float)($f['varsAll'] ?? 0);
+                    $materials      = (float)($f['materials'] ?? 0);
+                    $salaries       = (float)($f['salaries'] ?? 0);
                     $varsAccepted   = (float)($f['varsAccepted'] ?? 0);
                     $remaining      = (float)($f['remaining'] ?? (($totalQuotation + $varsAccepted) - $paid));
                 @endphp
@@ -79,15 +80,22 @@
 
                         <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">Variations (All)</div>
-                                <div class="fs-5 fw-bold">{{ number_format($varsAll, 2) }}</div>
+                                <div class="text-muted small">Variations (Accepted)</div>
+                                <div class="fs-5 fw-bold">{{ number_format($varsAccepted, 2) }}</div>
                             </div>
                         </div>
 
                         <div class="col-6 col-md-2">
                             <div class="border rounded p-2 h-100">
-                                <div class="text-muted small">Variations (Accepted)</div>
-                                <div class="fs-5 fw-bold">{{ number_format($varsAccepted, 2) }}</div>
+                                <div class="text-muted small">Salaries</div>
+                                <div class="fs-5 fw-bold">{{ number_format($salaries, 2) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Materials</div>
+                                <div class="fs-5 fw-bold">{{ number_format($materials, 2) }}</div>
                             </div>
                         </div>
 

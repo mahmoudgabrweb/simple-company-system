@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Milestone;
 use App\Models\Payment;
 use App\Models\Project;
 use App\Models\Client;
 use App\Models\City;
+use App\Models\ProjectExpense;
 use App\Models\Quotation;
+use App\Models\Salary;
+use App\Models\SupplierMaterial;
+use App\Models\SupplierPayment;
 use App\Models\Variation;
 use App\Support\CompanyContext;
 use Illuminate\Http\Request;
@@ -60,6 +65,18 @@ class ProjectController extends MainController
 
 // 2) Expenses (same; rename table if yours differs)
         $expenses = DB::table('project_expenses')
+            ->select('project_id', DB::raw('COALESCE(SUM(amount),0) as s'))
+            ->whereIn('project_id', $ids)
+            ->groupBy('project_id')
+            ->pluck('s', 'project_id');
+
+        $materials = DB::table('supplier_materials')
+            ->select('project_id', DB::raw('COALESCE(SUM(amount),0) as s'))
+            ->whereIn('project_id', $ids)
+            ->groupBy('project_id')
+            ->pluck('s', 'project_id');
+
+        $salaries = DB::table('salaries')
             ->select('project_id', DB::raw('COALESCE(SUM(amount),0) as s'))
             ->whereIn('project_id', $ids)
             ->groupBy('project_id')
@@ -153,11 +170,12 @@ class ProjectController extends MainController
             $totalQuotation = (float)($activeQuotationTotals[$pid] ?? 0);
             $paid = (float)($payments[$pid] ?? 0);
             $exp = (float)($expenses[$pid] ?? 0);
-            $varsAll = (float)($variationsAll[$pid] ?? 0);
             $varsAccepted = (float)($variationsAccepted[$pid] ?? 0);
+            $materials = (float)($materials[$pid] ?? 0);
+            $salaries = (float)($salaries[$pid] ?? 0);
             $remaining = ($totalQuotation + $varsAccepted) - $paid; // adjust if you want to subtract expenses too
 
-            $finance[$pid] = compact('totalQuotation', 'paid', 'exp', 'varsAll', 'varsAccepted') + ['remaining' => $remaining];
+            $finance[$pid] = compact('totalQuotation', 'paid', 'exp', 'materials', 'salaries', 'varsAccepted') + ['remaining' => $remaining];
         }
 
         return view('admin.projects.index', compact('projects', 'finance'));
@@ -223,43 +241,154 @@ class ProjectController extends MainController
 //        return view('admin.projects.index', compact('projects', 'finance'));
 //    }
 
-    public function show(int $id)
+    public function show($id)
     {
-        $this->checkPermission('read');
+        $user = auth()->user();
 
-        $project = Project::where("id", $id)->first();
-        // Eager-load light relations (adjust to your real relations)
-        $project->load([
-            'company:id,name',
-            'client:id,name',
-        ]);
+        // Project + relations
+        $projectQuery = Project::with(['company', 'client', 'city']);
+        if ($user && $user->company_id) {
+            $projectQuery->where('company_id', $user->company_id);
+        }
+        $project = $projectQuery->findOrFail($id);
 
-        // Active quotation = not completed/expired/rejected (tweak if your statuses differ)
-        $activeQuotation = Quotation::where('project_id', $project->id)
-            ->whereIn('status', ['draft', 'sent', 'accepted'])
-            ->latest('id')
-            ->first();
-
-        // Recent variations (last 5)
-        $recentVariations = Variation::where('project_id', $project->id)
-            ->orderByDesc('id')
-            ->limit(5)
+        // Quotations for this project
+        $quotations = Quotation::where('project_id', $project->id)
+            ->orderByDesc('created_at')
             ->get();
 
-        // Simple payments summary for the project (optional)
+        $activeQuotation = $quotations->firstWhere('is_active', 1);
+
+        // Variations for this project
+        $variations = Variation::where('project_id', $project->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $recentVariations = $variations->take(5);
+
+        $variationTotalsByStatus = Variation::selectRaw('status, COUNT(*) AS cnt, COALESCE(SUM(total),0) AS total')
+            ->where('project_id', $project->id)
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $acceptedVariationTotal = Variation::where('project_id', $project->id)
+            ->whereIn('status', ['accepted', 'completed'])
+            ->sum('total');
+
+        // Payments summary
+        $paymentsQ = Payment::where('project_id', $project->id);
+        if ($user && $user->company_id) {
+            $paymentsQ->where('company_id', $user->company_id);
+        }
         $paymentsSummary = [
-            'count' => Payment::where('project_id', $project->id)->count(),
-            'total' => (float)Payment::where('project_id', $project->id)->sum('amount'),
-            'latest' => Payment::where('project_id', $project->id)->orderByDesc('paid_at')->first(),
+            'total' => (float)$paymentsQ->sum('amount'),
+            'count' => (int)$paymentsQ->count(),
+            'latest' => $paymentsQ->orderByDesc('paid_at')->first(),
         ];
 
-        return view('admin.projects.show', compact(
-            'project', 'activeQuotation', 'recentVariations', 'paymentsSummary'
-        ));
+        // Project expenses
+        $peQ = ProjectExpense::where('project_id', $project->id);
+        if ($user && $user->company_id) {
+            $peQ->where('company_id', $user->company_id);
+        }
+        $projectExpensesTotal = (float)$peQ->sum('amount');
+
+        // Supplier materials & payments
+        $smQ = SupplierMaterial::where('project_id', $project->id);
+        $supplierMaterialIds = $smQ->pluck('id');
+        $supplierMaterialsTotal = (float)$smQ->sum('amount');
+
+        $supplierPaymentsTotal = (float)SupplierPayment::when($supplierMaterialIds->isNotEmpty(), function ($q) use ($supplierMaterialIds) {
+            $q->whereIn('supplier_material_id', $supplierMaterialIds);
+        })
+            ->sum('amount');
+
+        // Salaries (linked to project)
+        $salariesTotal = (float)Salary::where('project_id', $project->id)->sum('amount');
+
+        // Milestones: tied to this project's quotations via polymorphic (Quotation)
+        $quotationIds = $quotations->pluck('id');
+        $milestones = Milestone::where('milestonable_type', \App\Models\Quotation::class)
+            ->when($quotationIds->isNotEmpty(), fn($q) => $q->whereIn('milestonable_id', $quotationIds))
+            ->get();
+
+        $milestoneTotalsByStatus = $milestones->groupBy('status')->map(function ($g) {
+            return [
+                'count' => $g->count(),
+                'amount' => (float)$g->sum('amount'),
+            ];
+        });
+
+        // High-level finance
+        $contractBase = $activeQuotation ? (float)$activeQuotation->total_amount : 0.0;
+        $contractPlusVariations = $contractBase + (float)$acceptedVariationTotal;
+        $receivedTotal = (float)($paymentsSummary['total'] ?? 0);
+        $remainingReceivable = $contractPlusVariations - $receivedTotal;
+
+        // Costs bucket (project expenses + supplier materials/payments + salaries)
+        $directCosts = $projectExpensesTotal + $supplierMaterialsTotal + $salariesTotal;
+
+        return view('admin.projects.show', [
+            'project' => $project,
+            'quotations' => $quotations,
+            'activeQuotation' => $activeQuotation,
+            'variations' => $variations,
+            'recentVariations' => $recentVariations,
+            'variationTotalsByStatus' => $variationTotalsByStatus,
+            'paymentsSummary' => $paymentsSummary,
+            'projectExpensesTotal' => $projectExpensesTotal,
+            'supplierMaterialsTotal' => $supplierMaterialsTotal,
+            'supplierPaymentsTotal' => $supplierPaymentsTotal,
+            'salariesTotal' => $salariesTotal,
+            'milestones' => $milestones,
+            'milestoneTotalsByStatus' => $milestoneTotalsByStatus,
+            'contractBase' => $contractBase,
+            'contractPlusVariations' => $contractPlusVariations,
+            'receivedTotal' => $receivedTotal,
+            'remainingReceivable' => $remainingReceivable,
+            'directCosts' => $directCosts,
+        ]);
     }
 
 
-    // Voyager: GET voyager.projects.index
+//    public function show(int $id)
+//    {
+//        $this->checkPermission('read');
+//
+//        $project = Project::where("id", $id)->first();
+//        // Eager-load light relations (adjust to your real relations)
+//        $project->load([
+//            'company:id,name',
+//            'client:id,name',
+//        ]);
+//
+//        // Active quotation = not completed/expired/rejected (tweak if your statuses differ)
+//        $activeQuotation = Quotation::where('project_id', $project->id)
+//            ->whereIn('status', ['draft', 'sent', 'accepted'])
+//            ->latest('id')
+//            ->first();
+//
+//        // Recent variations (last 5)
+//        $recentVariations = Variation::where('project_id', $project->id)
+//            ->orderByDesc('id')
+//            ->limit(5)
+//            ->get();
+//
+//        // Simple payments summary for the project (optional)
+//        $paymentsSummary = [
+//            'count' => Payment::where('project_id', $project->id)->count(),
+//            'total' => (float)Payment::where('project_id', $project->id)->sum('amount'),
+//            'latest' => Payment::where('project_id', $project->id)->orderByDesc('paid_at')->first(),
+//        ];
+//
+//        return view('admin.projects.show', compact(
+//            'project', 'activeQuotation', 'recentVariations', 'paymentsSummary'
+//        ));
+//    }
+
+
+// Voyager: GET voyager.projects.index
 //    public function index()
 //    {
 //        $this->checkPermission('browse');
@@ -268,7 +397,8 @@ class ProjectController extends MainController
 //        return view('admin.projects.index', compact('stats'));
 //    }
 
-    public function load(Request $request): JsonResponse
+    public
+    function load(Request $request): JsonResponse
     {
         $this->checkPermission('browse');
 
@@ -303,8 +433,9 @@ class ProjectController extends MainController
             ->make();
     }
 
-    // Voyager: GET voyager.projects.create
-    public function create()
+// Voyager: GET voyager.projects.create
+    public
+    function create()
     {
         $this->checkPermission('add');
 
@@ -316,8 +447,9 @@ class ProjectController extends MainController
             ->with('currentCompany', CompanyContext::company());
     }
 
-    // Voyager: POST voyager.projects.store
-    public function store(Request $request): RedirectResponse|JsonResponse
+// Voyager: POST voyager.projects.store
+    public
+    function store(Request $request): RedirectResponse|JsonResponse
     {
         $this->checkPermission('add');
 
@@ -341,8 +473,9 @@ class ProjectController extends MainController
             ->with(['message' => 'تم إنشاء المشروع بنجاح', 'alert-type' => 'success']);
     }
 
-    // Voyager: GET voyager.projects.edit
-    public function edit(int $id)
+// Voyager: GET voyager.projects.edit
+    public
+    function edit(int $id)
     {
         $this->checkPermission('edit');
 
@@ -354,8 +487,9 @@ class ProjectController extends MainController
             ->with('currentCompany', CompanyContext::company());
     }
 
-    // Voyager: PUT/PATCH voyager.projects.update
-    public function update(Request $request, int $id): RedirectResponse|JsonResponse
+// Voyager: PUT/PATCH voyager.projects.update
+    public
+    function update(Request $request, int $id): RedirectResponse|JsonResponse
     {
         $this->checkPermission('edit');
 
@@ -380,8 +514,9 @@ class ProjectController extends MainController
             ->with(['message' => 'تم تحديث المشروع بنجاح', 'alert-type' => 'success']);
     }
 
-    // Voyager: DELETE voyager.projects.destroy
-    public function destroy(int $id): JsonResponse
+// Voyager: DELETE voyager.projects.destroy
+    public
+    function destroy(int $id): JsonResponse
     {
         $this->checkPermission('delete');
 
