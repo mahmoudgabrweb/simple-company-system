@@ -70,7 +70,7 @@
                     <div class="col-md-4">
                         <label class="form-label">Type <span class="text-danger">*</span></label>
                         <select name="type" class="form-select" required>
-                            @foreach(['salary'=>'Salary','overtime'=>'Overtime','bonus'=>'Bonus'] as $k=>$v)
+                            @foreach(['salary'=>'Salary','overtime'=>'Overtime','bonus'=>'Bonus', 'leave' => 'Leave', 'commission' => 'Commission'] as $k=>$v)
                                 <option value="{{ $k }}" @selected(old('type','salary')==$k)>{{ $v }}</option>
                             @endforeach
                         </select>
@@ -111,6 +111,10 @@
                         <input type="text" class="form-control"
                                value="{{ $currentCompany->name ?? 'Will be saved under the current company' }}"
                                disabled>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" cols="30" rows="3">{{ old("notes") }}</textarea>
                     </div>
                 </div>
             </div>

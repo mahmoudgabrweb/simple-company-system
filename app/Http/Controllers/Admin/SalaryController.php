@@ -181,7 +181,7 @@ class SalaryController extends MainController
             'project_id' => ['nullable', 'exists:projects,id'],
             'month' => ['required', 'date_format:Y-m'], // HTML <input type="month">
             'expense_type_id' => ['nullable', 'integer', 'exists:expense_types,id'],
-            'type' => ['required', Rule::in(['salary', 'overtime', 'bonus'])],
+            'type' => ['required', Rule::in(['salary', 'overtime', 'bonus', 'leave', 'commission'])],
             'amount' => 'required|numeric|min:0|max:9999999999.99',
             'days_count' => 'nullable|integer|min:0|max:365',
         ]);
@@ -197,7 +197,7 @@ class SalaryController extends MainController
             return back()->withErrors(['expense_type_id' => 'نوع المصروف لا ينتمي إلى الشركة الحالية'])->withInput();
         }
 
-        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
+        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count', 'notes']);
         // Convert YYYY-MM -> YYYY-MM-01
         $data['month'] = $request->input('month') . '-01';
 
@@ -242,7 +242,7 @@ class SalaryController extends MainController
             'project_id' => ['nullable', 'exists:projects,id'],
             'month' => ['required', 'date_format:Y-m'],
             'expense_type_id' => ['required', 'integer', 'exists:expense_types,id'],
-            'type' => ['required', Rule::in(['salary', 'overtime', 'bonus'])],
+            'type' => ['required', Rule::in(['salary', 'overtime', 'bonus', 'leave', 'commission'])],
             'amount' => 'required|numeric|min:0|max:9999999999.99',
             'days_count' => 'nullable|integer|min:0|max:365',
         ]);
@@ -258,12 +258,11 @@ class SalaryController extends MainController
         $salary = Salary::query()
             ->join('employees', 'employees.id', '=', 'salaries.employee_id')
             ->where('employees.company_id', $cid)
-            ->where('salaries.company_id', $cid)
             ->where('salaries.id', $id)
             ->select('salaries.*')
             ->firstOrFail();
 
-        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count']);
+        $data = $request->only(['title', 'project_id', 'employee_id', 'expense_type_id', 'type', 'amount', 'days_count', 'notes']);
         $data['month'] = $request->input('month') . '-01';
 
         $salary->update($data);

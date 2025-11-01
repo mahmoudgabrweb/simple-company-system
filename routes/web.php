@@ -99,6 +99,16 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
             Route::delete('variations/{variation}', [\App\Http\Controllers\Admin\VariationController::class, 'destroy'])->name('projects.variations.destroy');
         });
     });
+
+    Route::get('bank-transactions/{id}/attachment', [\App\Http\Controllers\Admin\BankTransactionController::class, 'download'])
+        ->name('voyager.bank_transactions.download');
+
+    Route::post('bank-transactions/{id}/reconciled', [\App\Http\Controllers\Admin\BankTransactionController::class, 'changeReconciled'])
+        ->name('voyager.bank_transactions.changeReconciled');
+
+    Route::post('bank-transactions/{id}/toggle-reconciled', [\App\Http\Controllers\Admin\BankTransactionController::class, 'toggleReconciled'])
+        ->name('voyager.bank_transactions.toggleReconciled');
+
     Route::get('/', fn() => redirect()->route('voyager.projects.index'))
         ->name('voyager.dashboard');
 

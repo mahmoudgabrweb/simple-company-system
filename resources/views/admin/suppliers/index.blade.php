@@ -28,6 +28,7 @@
 @section('content')
     <div class="container-xxl py-3">
 
+        {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="m-0">Suppliers</h4>
             <a href="{{ route('voyager.suppliers.create') }}" class="btn btn-primary">
@@ -35,96 +36,110 @@
             </a>
         </div>
 
-        {{-- Filters --}}
+        {{-- Filters (like Projects simple search) --}}
         <form method="get" class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-md-5">
                     <label class="form-label">Name</label>
                     <input type="text" name="name" class="form-control" value="{{ request('name') }}"
-                           placeholder="Search by name">
+                           placeholder="Supplier name">
                 </div>
-
                 <div class="col-md-5">
                     <label class="form-label">City</label>
                     <select name="city_id" class="form-select js-select2-city" data-placeholder="All cities">
                         <option value="">All</option>
                         @foreach($cities as $city)
-                            <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>
-                                {{ $city->name }}
-                            </option>
+                            <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>{{ $city->name }}</option>
                         @endforeach
                     </select>
                 </div>
-
                 <div class="col-md-2">
-                    <button class="btn btn-primary w-100"><i class="bx bx-search"></i> Filter</button>
+                    <button class="btn btn-secondary w-100"><i class="bx bx-search"></i> Filter</button>
                 </div>
             </div>
         </form>
 
-        {{-- Table --}}
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>City</th>
-                        <th>Contact Person</th>
-                        <th>Phone</th>
-                        <th>Status</th>
-                        <th>Attachment</th>
-                        <th>Created</th>
-                        <th style="width:130px;">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($suppliers as $i => $s)
-                        <tr>
-                            <td>{{ ($suppliers->currentPage()-1)*$suppliers->perPage() + $i + 1 }}</td>
-                            <td>{{ $s->name }}</td>
-                            <td>{{ $s->city?->name ?? '-' }}</td>
-                            <td>{{ $s->contact_person_name }}</td>
-                            <td>{{ $s->contact_person_phone }}</td>
-                            <td>
-                                <span class="badge bg-{{ $s->status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($s->status) }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($s->attachment_path)
-                                    <a href="{{ route('voyager.suppliers.download', $s->id) }}"
-                                       class="btn btn-sm btn-outline-primary">Download</a>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td>{{ $s->created_at?->format('Y-m-d') }}</td>
-                            <td>
-                                <a href="{{ route('voyager.suppliers.edit', $s->id) }}"
-                                   class="btn btn-sm btn-outline-primary">Edit</a>
-                                <form action="{{ route('voyager.suppliers.destroy', $s->id) }}" method="POST"
-                                      class="d-inline"
-                                      onsubmit="return confirm('Delete this supplier?')">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="text-center text-muted">No suppliers found.</td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
+        {{-- Empty state --}}
+        @if($suppliers->count() === 0)
+            <div class="card p-4 text-center text-muted">No suppliers found.</div>
+        @else
+            @foreach($suppliers as $s)
+                @php
+                    $f = $finance[$s->id] ?? [];
+                    $materials = (float)($f['materials'] ?? 0);
+                    $payments  = (float)($f['payments']  ?? 0);
+                    $remaining = (float)($f['remaining'] ?? ($materials - $payments));
+                @endphp
 
-            <div class="card-body">
-                {{ $suppliers->links() }}
-            </div>
-        </div>
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h5 class="m-0">{{ $s->name }}</h5>
+                            <div class="text-muted small">
+                                City: {{ $s->city->name ?? '—' }}
+                                · Contact: {{ $s->contact_person_name ?? '—' }}
+                                · Phone: {{ $s->contact_person_phone ?? '—' }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ route('voyager.suppliers.edit', $s->id) }}" class="btn btn-warning">Edit</a>
+                            @if($s->attachment_path)
+                                <a href="{{ route('voyager.suppliers.download', $s->id) }}"
+                                   class="btn btn-outline-primary">Attachment</a>
+                            @endif
+                            <a href="{{ route('voyager.suppliers.show', $s->id) }}" class="btn btn-outline-secondary">
+                                Show
+                            </a>
+                        </div>
+
+                    </div>
+
+                    {{-- Stats row: Payments / Materials / Remaining --}}
+                    <div class="row g-2 mt-2">
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Materials</div>
+                                <div class="fs-5 fw-bold">{{ number_format($materials, 2) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Total Supplier Payments</div>
+                                <div class="fs-5 fw-bold">{{ number_format($payments, 2) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Remaining</div>
+                                <div class="fs-5 fw-bold {{ $remaining > 0 ? 'text-danger' : '' }}">
+                                    {{ number_format($remaining, 2) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded p-2 h-100">
+                                <div class="text-muted small">Status</div>
+                                <div>
+                  <span class="badge bg-{{ $s->status === 'active' ? 'success' : 'secondary' }}">
+                    {{ ucfirst($s->status) }}
+                  </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mt-1">
+                        * Remaining = Materials − Total Supplier Payments.
+                    </div>
+                </div>
+            @endforeach
+
+            <div class="mt-2">{{ $suppliers->links() }}</div>
+        @endif
     </div>
 @endsection
 

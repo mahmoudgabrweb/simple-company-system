@@ -84,6 +84,7 @@
                         <th>Project</th>
                         <th>Month</th>
                         <th>Days</th>
+                        <th>Type</th>
                         <th>Amount</th>
                         <th>Notes</th>
                         <th>Created</th>
@@ -98,6 +99,7 @@
                             <td>{{ $salary->project?->name ?? '-' }}</td>
                             <td>{{ $salary->month ? \Carbon\Carbon::parse($salary->month)->format('Y-m') : '-' }}</td>
                             <td>{{ $salary->days_count }}</td>
+                            <td>{{ $salary->type }}</td>
                             <td>{{ number_format($salary->amount, 2) }}</td>
                             <td>{{ \Illuminate\Support\Str::limit($salary->notes, 40) }}</td>
                             <td>{{ $salary->created_at?->format('Y-m-d') }}</td>

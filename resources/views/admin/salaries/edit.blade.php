@@ -74,7 +74,7 @@
                     <div class="col-md-4">
                         <label class="form-label">Type <span class="text-danger">*</span></label>
                         <select name="type" class="form-select" required>
-                            @foreach(['salary'=>'Salary','overtime'=>'Overtime','bonus'=>'Bonus'] as $k=>$v)
+                            @foreach(['salary'=>'Salary','overtime'=>'Overtime','bonus'=>'Bonus', 'leave' => 'Leave', 'commission' => 'Commission'] as $k=>$v)
                                 <option value="{{ $k }}" @selected(old('type', $salary->type)==$k)>{{ $v }}</option>
                             @endforeach
                         </select>
@@ -113,6 +113,10 @@
                         <label class="form-label">Days Count</label>
                         <input type="number" min="0" max="365" name="days_count" class="form-control"
                                value="{{ old('days_count', $salary->days_count) }}">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" cols="30" rows="3">{{ old("notes", $salary->notes) }}</textarea>
                     </div>
                     <div class="col-md-4 small text-muted">
                         Created: {{ optional($salary->created_at)->format('Y-m-d H:i') ?? '—' }} —
