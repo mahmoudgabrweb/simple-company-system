@@ -13,6 +13,7 @@
         @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
+
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul class="mb-0">@foreach($errors->all() as $e)
@@ -66,30 +67,29 @@
 
                 <div class="col-12">
                     <label class="form-label">Notes</label>
-                    <textarea name="notes" class="form-control tinymce-editor">{{ $quotation->notes }}</textarea>
+                    <textarea name="notes" rows="3" class="form-control tinymce">{{ $quotation->notes }}</textarea>
                 </div>
             </div>
 
-            <div class="mt-3 d-flex justify-content-between align-items-center">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary">Save</button>
-                    @if($quotation->pdf_path)
-                        <a class="btn btn-outline-secondary" target="_blank"
-                           href="{{ asset('storage/'.$quotation->pdf_path) }}">
-                            View PDF
-                        </a>
-                    @endif
-                </div>
-                <span class="fw-bold">Total: {{ number_format($quotation->total_amount,2) }}</span>
+            <div class="mt-3">
+                <button class="btn btn-primary">Save</button>
+
+                <form class="d-inline" action="{{ route('admin.quotations.resend',$quotation->id) }}" method="post"
+                      onsubmit="return confirm('Send (or re-send) this quotation to the client?');">
+                    @csrf
+                    <button class="btn btn-outline-primary">Send / Resend to Client</button>
+                </form>
+
+                @if($quotation->pdf_path)
+                    <a class="btn btn-outline-secondary" target="_blank"
+                       href="{{ asset('storage/'.$quotation->pdf_path) }}">
+                        View PDF
+                    </a>
+                @endif
+
+                <span class="float-end fw-bold">Total: {{ number_format($quotation->total_amount,2) }}</span>
             </div>
         </form>
-
-        {{-- Send/Resend --}}
-{{--        <form class="mb-3" action="{{ route('admin.quotations.resend',$quotation->id) }}" method="post"--}}
-{{--              onsubmit="return confirm('Send (or re-send) this quotation to the client?');">--}}
-{{--            @csrf--}}
-{{--            <button class="btn btn-outline-primary">Send / Resend to Client</button>--}}
-{{--        </form>--}}
 
         {{-- Sections + Items --}}
         <div id="sections-sortable">
@@ -107,8 +107,8 @@
                         </div>
                         <div>
                             @if(!$section->is_static)
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#sec-edit-{{ $section->id }}" onclick="initEditors()">Edit Section
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                        data-bs-target="#sec-edit-{{ $section->id }}">Edit Section
                                 </button>
                                 <form class="d-inline"
                                       action="{{ route('admin.quotations.sections.delete', $section->id) }}"
@@ -133,8 +133,9 @@
                                                placeholder="Section title">
                                     </div>
                                     <div class="col-md-7">
-                                        <textarea name="description" class="form-control tinymce-editor"
-                                                  placeholder="Short description (optional)">{{ $section->description }}</textarea>
+                                        <input name="description" value="{{ $section->description }}"
+                                               class="form-control tinymce"
+                                               placeholder="Short description (optional)">
                                     </div>
                                     <div class="col-md-1">
                                         <button class="btn btn-primary w-100">Save</button>
@@ -163,9 +164,7 @@
                                     <td>
                                         <strong>{{ $it->title }}</strong>
                                         @if($it->description)
-                                            <div class="text-muted small">
-                                                {{ \Illuminate\Support\Str::limit(strip_tags($it->description),80) }}
-                                            </div>
+                                            <div class="text-muted small">{!! Str::limit(strip_tags($it->description),80) !!}</div>
                                         @endif
                                         @if($it->parent_item_id)
                                             <div class="small text-muted">Child of item #{{ $it->parent_item_id }}</div>
@@ -177,8 +176,8 @@
                                     <td>{{ number_format($it->unit_price ?? 0,2) }}</td>
                                     <td>{{ number_format($it->total_price,2) }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-warning" type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#it-{{ $it->id }}" onclick="initEditors()">Edit
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="collapse"
+                                                data-bs-target="#it-{{ $it->id }}">Edit
                                         </button>
                                         <form class="d-inline"
                                               action="{{ route('admin.quotations.items.delete',$it->id) }}"
@@ -200,6 +199,25 @@
                                                     <input name="title" value="{{ $it->title }}" class="form-control"
                                                            required>
                                                 </div>
+                                                <div class="col-md-3">
+                                                    <input name="description"
+                                                           value="{{ old('description',$it->description) }}"
+                                                           class="form-control tinymce"
+                                                           placeholder="Description (optional)">
+                                                </div>
+                                                {{--                                                <div class="col-md-2">--}}
+                                                {{--                                                    <input type="number" step="0.001" name="quantity"--}}
+                                                {{--                                                           value="{{ $it->quantity }}"--}}
+                                                {{--                                                           class="form-control" placeholder="Qty">--}}
+                                                {{--                                                </div>--}}
+                                                {{--                                                <div class="col-md-1">--}}
+                                                {{--                                                    <select name="unit_id" class="form-select">--}}
+                                                {{--                                                        <option value="">—</option>--}}
+                                                {{--                                                        @foreach($units as $u)--}}
+                                                {{--                                                            <option value="{{ $u->id }}" @selected($it->unit_id==$u->id)>{{ $u->code }}</option>--}}
+                                                {{--                                                        @endforeach--}}
+                                                {{--                                                    </select>--}}
+                                                {{--                                                </div>--}}
                                                 <div class="col-md-2">
                                                     <input type="number" step="0.01" name="unit_price"
                                                            value="{{ $it->unit_price }}"
@@ -207,7 +225,8 @@
                                                 </div>
                                                 <div class="col-md-12">
                                                     <label class="form-label small mb-1">Notes</label>
-                                                    <textarea name="description" class="form-control tinymce-editor">{{ $it->description }}</textarea>
+                                                    <textarea name="description" class="form-control tinymce"
+                                                              rows="3">{{ $it->description }}</textarea>
                                                 </div>
                                                 <div class="col-md-3">
                                                     <select name="is_excluded" class="form-select">
@@ -239,6 +258,18 @@
                             <div class="col-md-4">
                                 <input name="title" class="form-control" placeholder="New item" required>
                             </div>
+                            {{--                            <div class="col-md-2">--}}
+                            {{--                                <input type="number" step="0.001" name="quantity" class="form-control"--}}
+                            {{--                                       placeholder="Qty">--}}
+                            {{--                            </div>--}}
+                            {{--                            <div class="col-md-1">--}}
+                            {{--                                <select name="unit_id" class="form-select">--}}
+                            {{--                                    <option value="">—</option>--}}
+                            {{--                                    @foreach($units as $u)--}}
+                            {{--                                        <option value="{{ $u->id }}">{{ $u->code }}</option>--}}
+                            {{--                                    @endforeach--}}
+                            {{--                                </select>--}}
+                            {{--                            </div>--}}
                             <div class="col-md-2">
                                 <input type="number" step="0.01" name="unit_price" class="form-control"
                                        placeholder="Price">
@@ -261,9 +292,8 @@
                         <input name="title" class="form-control" placeholder="Section title" required>
                     </div>
                     <div class="col-md-5">
-
-                        <textarea name="description" class="form-control"
-                                  placeholder="Short description (optional)"></textarea>
+                        <input name="description" class="form-control tinymce"
+                               placeholder="Short description (optional)">
                     </div>
                     <div class="col-md-2">
                         <button class="btn btn-primary w-100">+ New Section</button>
@@ -271,58 +301,25 @@
                 </div>
             </form>
         </div>
-
     </div>
 @endsection
 
-@section('js_scripts')
-    <script src="https://cdn.tiny.cloud/1/bh4l7c3n79u8x3a8qb76u4xv873vqdr0tw1gvtxwoke5v7nr/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-
+@push('scripts')
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
-        let editorCounter = 0;
-
-        function initEditors() {
-            // Wait a bit for elements to be visible
-            setTimeout(function() {
-                // Find all textareas that need editors
-                document.querySelectorAll('textarea.tinymce-editor').forEach(function(textarea) {
-                    // Skip if already initialized
-                    if (textarea.classList.contains('tox-target')) {
-                        return;
-                    }
-
-                    // Give unique ID if it doesn't have one
-                    if (!textarea.id) {
-                        textarea.id = 'tinymce-' + (++editorCounter);
-                    }
-
-                    // Initialize TinyMCE on this specific textarea
-                    tinymce.init({
-                        target: textarea,
-                        menubar: false,
-                        plugins: 'lists link table code directionality',
-                        toolbar: 'undo redo | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | code',
-                        directionality: 'ltr',
-                        height: 200,
-                        branding: false,
-                        promotion: false,
-                        setup: function(editor) {
-                            editor.on('init', function() {
-                                console.log('Editor initialized: ' + editor.id);
-                            });
-                        }
-                    });
-                });
-            }, 200);
-        }
-
-        // Initialize when page loads
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(initEditors, 500);
+        document.addEventListener('DOMContentLoaded', function () {
+            tinymce.init({
+                selector: 'textarea.tinymce, .tinymce',
+                menubar: false,
+                plugins: 'lists link table code directionality',
+                toolbar: 'undo redo | styles | bold italic underline | bullist numlist | alignleft aligncenter alignright | link table | ltr rtl | code',
+                directionality: 'ltr', // switched to LTR
+                height: 220,
+                convert_urls: false,
+                relative_urls: false,
+                entity_encoding: 'raw',
+                branding: false,
             });
-        } else {
-            setTimeout(initEditors, 500);
-        }
+        });
     </script>
-@endsection
+@endpush
