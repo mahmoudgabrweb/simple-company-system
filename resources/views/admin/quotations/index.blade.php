@@ -85,6 +85,8 @@
                                 <div class="btn-group btn-group-sm">
                                     <a href="{{ route('voyager.quotations.edit', $q->id) }}" class="btn btn-warning">Edit</a>
 
+                                    <a href="{{ route('voyager.quotations.pdf', $q->id) }}" class="btn btn-warning">PDF</a>
+
                                     <form action="{{ route('voyager.quotations.destroy', $q->id) }}" method="post"
                                           onsubmit="return confirm('Delete this quotation?');">
                                         @csrf @method('DELETE')

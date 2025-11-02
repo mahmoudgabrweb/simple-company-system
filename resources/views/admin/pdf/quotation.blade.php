@@ -1,138 +1,213 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="utf-8">
-    <title>عرض رقم {{ $quotation->quotation_number ?? $quotation->id }}</title>
-    <style>
-        @page {
-            margin: 24px;
-        }
+{{-- resources/views/pdf/quotation.blade.php --}}
+@include('admin.pdf.partials.header')
 
-        body {
-            font-family: DejaVu Sans, Arial, sans-serif;
-            font-size: 12px;
-            color: #111;
-        }
+@php
+    $money = fn($v) => number_format((float)$v, 2);
+    $qty   = fn($v) => $v === null ? '' : rtrim(rtrim(number_format((float)$v, 3, '.', ''), '0'), '.');
+@endphp
 
-        h1, h2, h3, h4 {
-            margin: 0 0 8px;
-        }
+<style>
+    body {
+        font-family: DejaVu Sans, sans-serif;
+        font-size: 12px;
+        color: #111;
+    }
 
-        .muted {
-            color: #666;
-        }
+    p {
+        margin: 0 0 6px;
+        line-height: 1.5;
+    }
 
-        .row {
-            width: 100%;
-        }
+    ul, ol {
+        margin: 6px 0 6px 18px;
+    }
 
-        .col-6 {
-            width: 49%;
-            display: inline-block;
-            vertical-align: top;
-        }
+    .meta {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
 
-        .mb-1 {
-            margin-bottom: 6px;
-        }
+    .meta-grid {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+    }
 
-        .mb-2 {
-            margin-bottom: 10px;
-        }
+    .meta-grid td {
+        padding: 3px 6px;
+        vertical-align: top;
+    }
 
-        .mb-3 {
-            margin-bottom: 14px;
-        }
+    .meta-grid .label {
+        color: #6b7280;
+        width: 140px;
+        white-space: nowrap;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .section-header {
+        margin: 14px 0 6px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 6px;
-        }
+    table.table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        th {
-            background: #f5f5f5;
-        }
+    .table th, .table td {
+        border: 1px solid #d1d5db;
+        padding: 6px 8px;
+    }
 
-        .totals {
-            width: 45%;
-            margin-left: auto;
-        }
-    </style>
-</head>
-<body>
-<h2>عرض سعر</h2>
-<div class="row mb-2">
-    <div class="col-6">
-        <div><strong>المشروع:</strong> {{ $quotation->project->name ?? '—' }}</div>
-        <div><strong>رقم العرض:</strong> {{ $quotation->quotation_number ?? $quotation->id }}</div>
-        <div><strong>النسخة:</strong> {{ $quotation->version }}</div>
-        @if($quotation->valid_until)
-            <div><strong>صالح حتى:</strong> {{ $quotation->valid_until->format('Y-m-d') }}</div>
-        @endif
-    </div>
-    <div class="col-6">
-        <div><strong>الحالة:</strong> {{ $quotation->status }}</div>
-        @if($quotation->sent_at)
-            <div><strong>تاريخ الإرسال:</strong> {{ $quotation->sent_at->format('Y-m-d H:i') }}</div>
-        @endif
-        @if($quotation->approved_at)
-            <div><strong>تاريخ الموافقة:</strong> {{ $quotation->approved_at->format('Y-m-d H:i') }}</div>
-        @endif
-    </div>
-</div>
+    .table th {
+        background: #f3f4f6;
+        font-weight: 700;
+    }
 
-@foreach($quotation->sections as $section)
-    <h3 class="mb-1">{{ $section->letter_code ? $section->letter_code.'. ' : '' }}{{ $section->title }}</h3>
-    @if($section->description)
-        <div class="mb-1">{!! $section->description !!}</div>
-    @endif
-    <table class="mb-3">
-        <thead>
-        <tr>
-            <th style="width:5%">#</th>
-            <th>الوصف</th>
-            <th style="width:12%">الكمية</th>
-            <th style="width:12%">الوحدة</th>
-            <th style="width:15%">سعر الوحدة/المقطوع</th>
-            <th style="width:15%">الإجمالي</th>
-        </tr>
-        </thead>
-        <tbody>
-        @php $i=1; @endphp
-        @foreach($section->allItems()->where('is_excluded', false)->get() as $item)
+    .right {
+        text-align: right;
+    }
+
+    .muted {
+        color: #6b7280;
+    }
+
+    .strike {
+        text-decoration: line-through;
+        color: #9ca3af;
+    }
+
+    .indent-0 {
+        padding-left: 0;
+    }
+
+    .indent-1 {
+        padding-left: 14px;
+    }
+
+    .indent-2 {
+        padding-left: 28px;
+    }
+
+    .indent-3 {
+        padding-left: 42px;
+    }
+
+    .details {
+        font-size: 11px;
+        color: #374151;
+        margin-top: 3px;
+    }
+
+    .table tr {
+        page-break-inside: avoid;
+    }
+
+    .totals {
+        margin-top: 8px;
+        width: 50%;
+        margin-left: auto;
+        border-collapse: collapse;
+    }
+
+    .totals td {
+        padding: 6px 8px;
+        border: 1px solid #d1d5db;
+    }
+
+    .totals tr:nth-child(odd) {
+        background: #fafafa;
+    }
+</style>
+
+<main>
+    {{-- Meta --}}
+    <div class="meta">
+        <table class="meta-grid">
             <tr>
-                <td>{{ $i++ }}</td>
-                <td>
-                    <strong>{{ $item->title }}</strong>
-                    @if($item->description)
-                        <div class="muted">{!! $item->description !!}</div>
-                    @endif
-                </td>
-                <td>{{ $item->quantity ?? '—' }}</td>
-                <td>{{ optional($item->unit)->code ?? '—' }}</td>
-                <td>{{ number_format($item->unit_price ?? 0, 2) }}</td>
-                <td>{{ number_format($item->total_price, 2) }}</td>
+                <td class="label">TO:</td>
+                <td>{{ $quotation->project?->client?->name ?? '-' }}</td>
+                <td class="label">DATE:</td>
+                <td>{{ optional($quotation->created_at)->format('m/d/Y') }}</td>
             </tr>
-        @endforeach
-        </tbody>
+            <tr>
+                <td class="label">LOCATION:</td>
+                <td>{{ $quotation->project?->location ?? $quotation->project?->name ?? '-' }}</td>
+                <td class="label">REF:</td>
+                <td>{{ $quotation->quotation_number ?? ('Q-'.$quotation->id) }}</td>
+            </tr>
+            <tr>
+                <td class="label">COMPANY:</td>
+                <td>{{ $quotation->company?->name ?? ($branding['brand'] ?? '') }}</td>
+                <td class="label">VERSION:</td>
+                <td>{{ $quotation->version ?? '1' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- Sections --}}
+    @foreach($quotation->sections as $section)
+        <div class="section-header">
+            {{ trim(($section->letter_code ? $section->letter_code.' — ' : '').($section->title ?? '')) }}
+        </div>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th style="width:60px">No</th>
+                <th>Description</th>
+                <th style="width:90px" class="right">Qty</th>
+                <th style="width:110px" class="right">Unit Price</th>
+                <th style="width:120px" class="right">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            @php $rowIndex = 1; @endphp
+            @foreach($section->items as $item)
+                @include('admin.pdf.partials.item-row', [
+                  'item' => $item,
+                  'level' => 0,
+                  'rowIndex' => $rowIndex,
+                  'money' => $money,
+                  'qty' => $qty
+                ])
+                @php
+                    // update rowIndex to whatever the last included partial advanced to
+                    $rowIndex = $rowIndex + 1 + ($item->children->count() ? $item->children->count() : 0);
+                @endphp
+            @endforeach
+            </tbody>
+        </table>
+    @endforeach
+
+    {{-- Totals --}}
+    @php
+        $sub   = (float)($quotation->total_amount ?? 0);
+        $vat   = round($sub * 0.05, 2);
+        $grand = round($sub + $vat, 2);
+    @endphp
+
+    <table class="totals">
+        <tr>
+            <td>Sub Total (Excl. VAT)</td>
+            <td class="right">{{ $money($sub) }}</td>
+        </tr>
+        <tr>
+            <td>VAT (5%)</td>
+            <td class="right">{{ $money($vat) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total</strong></td>
+            <td class="right"><strong>{{ $money($grand) }}</strong></td>
+        </tr>
     </table>
-@endforeach
 
-<table class="totals">
-    <tr>
-        <th>الإجمالي</th>
-        <td>{{ number_format($quotation->total_amount,2) }}</td>
-    </tr>
-</table>
-
-@if($quotation->notes)
-    <div class="mb-2"><strong>ملاحظات:</strong></div>
-    <div>{!! $quotation->notes !!}</div>
-@endif
-</body>
-</html>
+    {{-- Notes --}}
+    @if(!empty($quotation->notes))
+        <div class="section-header">Notes</div>
+        <div style="font-size:11px; line-height:1.5;">{!! $quotation->notes !!}</div>
+    @endif
+</main>

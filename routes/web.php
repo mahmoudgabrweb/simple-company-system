@@ -109,6 +109,9 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
     Route::post('bank-transactions/{id}/toggle-reconciled', [\App\Http\Controllers\Admin\BankTransactionController::class, 'toggleReconciled'])
         ->name('voyager.bank_transactions.toggleReconciled');
 
+    Route::get('/quotations/{quotation}/pdf', [\App\Http\Controllers\Admin\QuotationPdfController::class, 'download'])
+        ->name('voyager.quotations.pdf');
+
     Route::get('/', fn() => redirect()->route('voyager.projects.index'))
         ->name('voyager.dashboard');
 
