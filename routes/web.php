@@ -112,6 +112,13 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
     Route::get('/quotations/{quotation}/pdf', [\App\Http\Controllers\Admin\QuotationPdfController::class, 'download'])
         ->name('voyager.quotations.pdf');
 
+    Route::get('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('site_settings.index');
+    Route::get('site-settings/{id}/edit', [\App\Http\Controllers\Admin\SiteSettingController::class, 'edit'])->name('site_settings.edit');
+    Route::match(['put', 'patch'], 'site-settings/{id}', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('site_settings.update');
+
+    // Inline footer link deletion (AJAX)
+    Route::delete('site-settings/footer-link/{id}', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteFooterLink'])->name('site_settings.footer_link.delete');
+
     Route::get('/', fn() => redirect()->route('voyager.projects.index'))
         ->name('voyager.dashboard');
 

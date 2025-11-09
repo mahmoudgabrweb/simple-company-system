@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SupplierPayment;
 use App\Models\Supplier;
 use App\Models\SupplierMaterial;
-use App\Models\Project;
+use App\Models\SiteProject;
 use App\Models\Employee;
 use App\Support\CompanyContext;
 use Illuminate\Http\Request;

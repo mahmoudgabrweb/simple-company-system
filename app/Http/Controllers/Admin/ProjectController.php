@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Milestone;
 use App\Models\Payment;
-use App\Models\Project;
+use App\Models\SiteProject;
 use App\Models\Client;
 use App\Models\City;
 use App\Models\ProjectExpense;
@@ -26,7 +26,7 @@ class ProjectController extends MainController
     public function __construct()
     {
         $this->moduleName = 'projects';
-        $this->model = Project::class;
+        $this->model = SiteProject::class;
     }
 
     public function index(Request $request)
@@ -35,7 +35,7 @@ class ProjectController extends MainController
 
         $q = trim($request->get('q', ''));
 
-        $projects = \App\Models\Project::with(['client:id,name', 'city:id,name'])
+        $projects = \App\Models\SiteProject::with(['client:id,name', 'city:id,name'])
             ->where("company_id", CompanyContext::id())
             ->when($q, function ($qq) use ($q) {
                 $qq->where(function ($w) use ($q) {
@@ -246,7 +246,7 @@ class ProjectController extends MainController
         $user = auth()->user();
 
         // Project + relations
-        $projectQuery = Project::with(['company', 'client', 'city']);
+        $projectQuery = SiteProject::with(['company', 'client', 'city']);
         if ($user && $user->company_id) {
             $projectQuery->where('company_id', $user->company_id);
         }
@@ -402,7 +402,7 @@ class ProjectController extends MainController
     {
         $this->checkPermission('browse');
 
-        $q = Project::query()
+        $q = SiteProject::query()
             ->where("company_id", CompanyContext::id())
             ->with(['client:id,name', 'city:id,name'])
             ->select(['id', 'name', 'client_id', 'city_id', 'address', 'created_at']);
@@ -439,7 +439,7 @@ class ProjectController extends MainController
     {
         $this->checkPermission('add');
 
-        $project = new Project();
+        $project = new SiteProject();
         $clients = Client::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
         $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
@@ -467,7 +467,7 @@ class ProjectController extends MainController
             'map' => 'nullable|string',
         ]);
 
-        Project::create($request->only(['name', 'client_id', 'city_id', 'address', 'location', 'map']));
+        SiteProject::create($request->only(['name', 'client_id', 'city_id', 'address', 'location', 'map']));
 
         return redirect()->route('voyager.projects.index')
             ->with(['message' => 'تم إنشاء المشروع بنجاح', 'alert-type' => 'success']);
@@ -479,7 +479,7 @@ class ProjectController extends MainController
     {
         $this->checkPermission('edit');
 
-        $project = Project::findOrFail($id);
+        $project = SiteProject::findOrFail($id);
         $clients = Client::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
         $cities = City::where("company_id", CompanyContext::id())->orderBy('name')->get(['id', 'name']);
 
@@ -507,7 +507,7 @@ class ProjectController extends MainController
             'map' => 'nullable|string',
         ]);
 
-        $project = Project::findOrFail($id);
+        $project = SiteProject::findOrFail($id);
         $project->update($request->only(['name', 'client_id', 'city_id', 'address', 'location', 'map']));
 
         return redirect()->route('voyager.projects.index')
@@ -520,7 +520,7 @@ class ProjectController extends MainController
     {
         $this->checkPermission('delete');
 
-        $project = Project::findOrFail($id);
+        $project = SiteProject::findOrFail($id);
         $project->delete();
 
         return response()->json(['status' => true, 'message' => 'تم الحذف بنجاح']);

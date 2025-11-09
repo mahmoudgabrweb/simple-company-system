@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Project;
+use App\Models\SiteProject;
 use App\Models\Salary;
 use App\Models\Employee;
 use App\Models\ExpenseType;
@@ -54,7 +54,7 @@ class SalaryController extends MainController
             ->appends($request->query());
 
         // Projects dropdown (use the correct name column for your schema)
-        $projects = Project::where("company_id", CompanyContext::id())->orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = SiteProject::where("company_id", CompanyContext::id())->orderBy('id', 'desc')->select('id', 'name')->get();
         $employees = Employee::where("company_id", CompanyContext::id())->orderBy('id', 'desc')->select('id', 'name')->get();
 
         $sumAll = (clone $query)->reorder()->sum('amount');
@@ -162,7 +162,7 @@ class SalaryController extends MainController
         $salary = new Salary();
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
-        $projects = Project::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = SiteProject::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
 
         return view('admin.salaries.create', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());
@@ -223,7 +223,7 @@ class SalaryController extends MainController
 
         $employees = Employee::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
         $types = ExpenseType::where('company_id', $cid)->orderBy('name')->get(['id', 'name']);
-        $projects = Project::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
+        $projects = SiteProject::where("company_id", $cid)->orderBy('id', 'desc')->select('id', 'name')->get();
 
         return view('admin.salaries.edit', compact('salary', 'employees', 'types', 'projects'))
             ->with('currentCompany', CompanyContext::company());

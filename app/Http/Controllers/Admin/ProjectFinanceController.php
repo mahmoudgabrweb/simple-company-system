@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Project;
+use App\Models\SiteProject;
 use App\Models\Payment;
 use App\Models\ProjectExpense;
 use App\Models\Quotation;
@@ -23,12 +23,12 @@ class ProjectFinanceController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('browse', app(Project::class));
+        $this->authorize('browse', app(SiteProject::class));
 
         $companyId = $this->activeCompanyId();
 
         // Filters (optional): by name or client
-        $q = Project::query()
+        $q = SiteProject::query()
             ->with(['client', 'city'])
             ->when($companyId, fn($x) => $x->where('company_id', $companyId))
             ->when($request->filled('q'), function ($x) use ($request) {
@@ -81,11 +81,11 @@ class ProjectFinanceController extends Controller
      */
     public function financials(int $projectId, Request $request)
     {
-        $this->authorize('read', app(Project::class));
+        $this->authorize('read', app(SiteProject::class));
 
         $companyId = $this->activeCompanyId();
 
-        $project = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))
+        $project = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))
             ->with(['client', 'city'])
             ->findOrFail($projectId);
 

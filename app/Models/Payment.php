@@ -27,7 +27,7 @@ class Payment extends Model
 
     public function project()
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(SiteProject::class);
     }
 
     public function receiver()
