@@ -1,1 +1,0 @@
-import{h as o,j as e,q as a,r as n,o as c}from"./CUG0QQ6v.js";const l={class:"flex items-center gap-6 mb-8"},r={class:"text-2xl/loose font-bold me-auto"},i={class:"flex items-center gap-4"},m={__name:"Heading",props:{title:String},setup(t){return(s,_)=>(c(),o("section",l,[e("h1",r,a(t.title),1),e("div",i,[n(s.$slots,"default")])]))}};export{m as _};

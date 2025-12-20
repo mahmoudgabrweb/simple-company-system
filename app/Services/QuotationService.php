@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Quotation;
 use App\Models\QuotationSection;
 use App\Models\QuotationItem;
-use App\Models\SiteProject;
+use App\Models\Project;
 use Illuminate\Support\Facades\DB;
 
 class QuotationService
@@ -13,7 +13,7 @@ class QuotationService
     /**
      * Create a new quotation with default static sections
      */
-    public function createQuotation(SiteProject $project, array $data = [])
+    public function createQuotation(Project $project, array $data = [])
     {
         return DB::transaction(function () use ($project, $data) {
             $quotation = Quotation::create([
@@ -37,7 +37,7 @@ class QuotationService
     /**
      * Generate unique quotation number
      */
-    private function generateQuotationNumber(SiteProject $project): string
+    private function generateQuotationNumber(Project $project): string
     {
         $count = Quotation::where('project_id', $project->id)->count();
         $projectCode = strtoupper(substr($project->name, 0, 3));

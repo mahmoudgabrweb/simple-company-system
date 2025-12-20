@@ -1,1 +1,0 @@
-import{i as r}from"./q4HwEFdD.js";import{f as u,c as s,ah as n}from"./CUG0QQ6v.js";function d(o){const e=r({dir:u("ltr")});return s(()=>{var t;return(o==null?void 0:o.value)||((t=e.dir)==null?void 0:t.value)||"ltr"})}let i=0;function f(o,e="reka"){const t=r({useId:void 0});return n?`${e}-${n()}`:t.useId?`${e}-${t.useId()}`:`${e}-${++i}`}export{f as a,d as u};

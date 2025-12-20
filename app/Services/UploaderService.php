@@ -9,35 +9,36 @@ use Image;
 
 class UploaderService
 {
-    public function uploadImage(UploadedFile $avatarFile, string $path, bool $applyCut = false, int $width = 200, int $height = 200): array
+    public function uploadImage(UploadedFile $file, string $path, bool $applyCut = false, int $width = 200, int $height = 200): array
     {
-        $avatarName = $this->generateRandomString() . "_" . time() . "." . $avatarFile->getClientOriginalExtension();
+        $name = $this->generateRandomString() . "_" . time() . "." . $file->getClientOriginalExtension();
 
         try {
-            $avatarImage = Image::make($avatarFile->getRealPath());
+            $img = Image::make($file->getRealPath());
 
             if ($applyCut) {
-                $avatarImage->resize($width, $height, function ($constraint) {
-                    $constraint->aspectRatio();
+                $img->resize($width, $height, function ($c) {
+                    $c->aspectRatio();
                 });
             }
 
-            $avatarImage->stream();
+            $img->stream();
 
-            $isUploaded = Storage::put("$path/$avatarName", $avatarImage);
+            Storage::disk('public')->put("$path/$name", (string)$img);
 
-            return [$isUploaded, $path . "/" . $avatarName];
+            return [true, "$path/$name"];
         } catch (\Exception $e) {
             return [false, ""];
         }
     }
 
-    public function uploadFile(UploadedFile $avatarFile, string $path): array
+    public function uploadFile(UploadedFile $file, string $path): array
     {
-        $avatarName = $this->generateRandomString() . "_" . time() . "." . $avatarFile->getClientOriginalExtension();
+        $name = $this->generateRandomString() . "_" . time() . "." . $file->getClientOriginalExtension();
+
         try {
-            $isUploaded = Storage::put("$path/$avatarName", $avatarFile->getRealPath());
-            return [$isUploaded, $path . "/" . $avatarName];
+            Storage::disk('public')->putFileAs($path, $file, $name);
+            return [true, $path . "/" . $name];
         } catch (\Exception $e) {
             return [false, ""];
         }

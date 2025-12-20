@@ -1,10 +1,18 @@
 <?php
 
+use App\Models\SiteSetting;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use TCG\Voyager\Models\Menu;
 use TCG\Voyager\Models\MenuItem;
 use TCG\Voyager\Models\Permission;
+
+if (!function_exists("loadSettings")) {
+    function loadSettings(): array
+    {
+        return SiteSetting::pluck("value", "key")->toArray();
+    }
+}
 
 // -------- URL helpers ----------
 // Get normalized path for any URL
@@ -87,10 +95,11 @@ if (!function_exists('_infer_browse_permission_key')) {
 if (!function_exists('checkIfOneMenuItemActive')) {
     function checkIfOneMenuItemActive(
         MenuItem $item,
-        array $allowedBrowseIds,
-        array $allowedBrowseKeys,
-        ?string $currentPath = null
-    ): string {
+        array    $allowedBrowseIds,
+        array    $allowedBrowseKeys,
+        ?string  $currentPath = null
+    ): string
+    {
         $currentPath = $currentPath ?? _path_of(url()->current());
         $href = $item->link(true);
 
@@ -160,7 +169,8 @@ if (!function_exists('_renderMenuLevel')) {
         array $allowedBrowseIds,
         array $allowedBrowseKeys,
         string $currentPath
-    ): string {
+    ): string
+    {
         $ulClass = $level === 0 ? 'menu-inner py-1' : 'menu-sub';
         $html = "<ul class=\"{$ulClass}\">";
 
@@ -212,7 +222,7 @@ if (!function_exists('_renderMenuLevel')) {
                 $html .= "
                     <li class=\"{$liClass}\">
                         <a href=\"{$href}\" class=\"menu-link\">
-                            <i class=\"menu-icon tf-icons ti ti-mail\"></i>
+                            <i class=\"menu-icon tf-icons {$item->icon_class}\"></i>
                             <div data-i18n=\"{$item->title}\">{$item->title}</div>
                         </a>
                     </li>

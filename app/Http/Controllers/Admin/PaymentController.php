@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Models\SiteProject;
+use App\Models\Project;
 use App\Models\Employee;
 use App\Support\CompanyContext;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class PaymentController extends Controller
 
         $payments = $q->paginate(20)->appends($request->query());
 
-        $projects = SiteProject::where('company_id', $companyId)->orderBy('name')->get();
+        $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
         $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 
         return view('admin.payments.index', compact('payments', 'projects', 'methods'));
@@ -50,7 +50,7 @@ class PaymentController extends Controller
         $this->authorize('add', app(Payment::class));
 
         $companyId = CompanyContext::id();
-        $projects = SiteProject::where('company_id', $companyId)->orderBy('name')->get();
+        $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
         $employees = Employee::where('company_id', $companyId)->orderBy('name')->get();
         $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 
@@ -111,7 +111,7 @@ class PaymentController extends Controller
 
         $companyId = CompanyContext::id();
         $payment = Payment::where('company_id', $companyId)->with(['project', 'receiver'])->findOrFail($id);
-        $projects = SiteProject::where('company_id', $companyId)->orderBy('name')->get();
+        $projects = Project::where('company_id', $companyId)->orderBy('name')->get();
         $employees = Employee::where('company_id', $companyId)->orderBy('name')->get();
         $methods = ['cash' => 'Cash', 'transfer' => 'Transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'];
 

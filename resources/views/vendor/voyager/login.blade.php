@@ -5,7 +5,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
-    <title>KAME — Login</title>
+    <title>AIA Interior — Login</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}"/>
 
     <!-- Fonts -->
@@ -64,13 +64,13 @@
                     <!-- Logo -->
                     <div class="app-brand justify-content-center mb-4 text-center">
                         <a href="#" class="app-brand-link d-inline-block">
-                            <img src="{{ asset('admin-assets/logo.png') }}" alt="KAME Logo" width="160">
+                            <img src="{{ asset('admin-assets/logo.png') }}" alt="AIA Logo" width="160">
                         </a>
                     </div>
 
                     <!-- Title -->
                     <h4 class="mb-1 text-center" style="color:#1D2A3A;">Welcome back 👋</h4>
-                    <p class="mb-4 text-center text-muted">Please sign in to your KAME account</p>
+                    <p class="mb-4 text-center text-muted">Please sign in to your AIA Interior account</p>
 
                     <!-- Alerts -->
                     @if ($errors->any())
@@ -136,7 +136,7 @@
                     </form>
 
                     <p class="text-center text-muted mb-0" style="font-size: .9rem;">
-                        © {{ date('Y') }} <strong style="color:#1D2A3A;">KAME</strong>. All rights reserved.
+                        © {{ date('Y') }} <strong style="color:#1D2A3A;">AIA Interior</strong>. All rights reserved.
                     </p>
                 </div>
             </div>

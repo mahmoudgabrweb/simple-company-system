@@ -1,169 +1,198 @@
 <?php
 
-
 namespace App\Http\Controllers\Admin;
 
-use App\Models\FooterLink;
 use App\Models\SiteSetting;
-use App\Support\CompanyContext;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
+use App\Services\UploaderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class SiteSettingController extends MainController
 {
     public function __construct()
     {
-        // Not a typical CRUD list; treat as a singleton module
         $this->moduleName = 'site_settings';
         $this->model = SiteSetting::class;
     }
 
-    // Voyager: GET voyager.site_settings.index => redirect to edit singleton
     public function index()
     {
-        $this->checkPermission('browse');
+//        $this->checkPermission($this->moduleName . '_edit');
 
-        $settings = SiteSetting::singleton();
-        return redirect()->route('voyager.site_settings.edit', $settings->id);
+        $settings = SiteSetting::orderBy('key')->get();
+
+        return view('admin.site_settings.edit', compact('settings'));
     }
 
-    // Voyager: GET voyager.site_settings.edit
-    public function edit(int $id)
+    public function update(Request $request)
     {
-        $this->checkPermission('edit');
+//        $this->checkPermission($this->moduleName . '_edit');
 
-        $settings = SiteSetting::forCompany()->findOrFail($id);
+        $payload = $request->input('settings', []);
+        $toDeleteIds = array_map('intval', $request->input('deleted_ids', []));
 
-        // Load footer links grouped (useful, services, projects, custom)
-        $footerLinks = FooterLink::forCompany()
-            ->ordered()
-            ->get()
-            ->groupBy('group_key');
+        // Normalize: remove completely empty new rows
+        $payload = collect($payload)->filter(function ($row) {
+            $key = trim((string)($row['key'] ?? ''));
+            $type = (string)($row['type'] ?? '');
+            $hasValue = isset($row['value']) && trim((string)$row['value']) !== '';
+            return $key !== '' || $type !== '' || $hasValue;
+        })->toArray();
 
-        return view('admin.site.site_settings.edit', compact('settings', 'footerLinks'))
-            ->with('currentCompany', CompanyContext::company());
-    }
+        // Build validation rules per row
+        $rules = [];
+        $messages = [];
 
-    // Voyager: PUT/PATCH voyager.site_settings.update
-    public function update(Request $request, int $id): RedirectResponse|JsonResponse
-    {
-        $this->checkPermission('edit');
+        foreach ($payload as $rowKey => $row) {
+            $id = $row['id'] ?? null;
+            $keyPath = "settings.$rowKey.key";
+            $typePath = "settings.$rowKey.type";
+            $valuePath = "settings.$rowKey.value";
+            $filePath = "settings.$rowKey.file";
 
-        $request->validate([
-            // Contacts
-            'emails' => 'nullable|array',
-            'emails.*' => 'nullable|string|max:190',
-            'phones' => 'nullable|array',
-            'phones.*' => 'nullable|string|max:190',
+            $rules[$keyPath] = ['required', 'string', 'max:191'];
+            $rules[$typePath] = ['required', Rule::in(['text', 'longtext', 'file'])];
 
-            'address_line' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:120',
-            'country' => 'nullable|string|max:120',
+            // Key uniqueness (ignore same ID)
+            $rules[$keyPath][] = Rule::unique('site_settings', 'key')->ignore($id);
 
-            // Socials
-            'whatsapp_url' => 'nullable|string|max:255',
-            'facebook_url' => 'nullable|string|max:255',
-            'instagram_url' => 'nullable|string|max:255',
-            'linkedin_url' => 'nullable|string|max:255',
-            'youtube_url' => 'nullable|string|max:255',
+            // Value required for text/longtext
+            $rules[$valuePath] = [
+                Rule::requiredIf(fn() => in_array(($row['type'] ?? null), ['text', 'longtext'], true)),
+                'nullable',
+                'string',
+            ];
 
-            // Portfolio CTA
-            'portfolio_cta_text' => 'nullable|string|max:120',
-            'portfolio_cta_url' => 'nullable|string|max:255',
+            // File validation when type=file
+            // Required if: type=file AND (new OR existing has no value OR switched_to_file flag)
+            $rules[$filePath] = [
+                Rule::requiredIf(function () use ($row) {
+                    if (($row['type'] ?? null) !== 'file') return false;
+                    $isNew = empty($row['id']);
+                    $hasExistingFile = !empty($row['value']); // value holds old path
+                    $switchedToFile = !empty($row['switched_to_file']);
+                    return $isNew || $switchedToFile || !$hasExistingFile;
+                }),
+                'nullable',
+                'file',
+                'max:5120', // 5MB
+                // If you want strict types: 'mimes:jpg,jpeg,png,webp,pdf'
+            ];
 
-            // Footer about
-            'footer_about_title' => 'nullable|string|max:190',
-            'footer_about_text' => 'nullable|string',
+            $messages["$filePath.required"] = 'File is required for file type settings.';
+        }
 
-            // Branding
-            'logo_path' => 'nullable|string|max:255',
-            'favicon_path' => 'nullable|string|max:255',
-
-            // Footer links (optional, inline manage)
-            'footer_links' => 'sometimes|array',
-            'footer_links.*.id' => 'nullable|integer|exists:footer_links,id',
-            'footer_links.*.label' => 'required_with:footer_links|string|max:190',
-            'footer_links.*.url' => 'required_with:footer_links|string|max:255',
-            'footer_links.*.group_key' => 'nullable|string|max:50',
-            'footer_links.*.display_order' => 'nullable|integer|min:0',
-            'footer_links.*.is_active' => 'nullable|boolean',
-        ]);
-
-        DB::transaction(function () use ($request, $id) {
-            $settings = SiteSetting::forCompany()->findOrFail($id);
-
-            // Normalize empty strings in arrays
-            $emails = array_values(array_filter((array)$request->input('emails', []), fn($v) => filled($v)));
-            $phones = array_values(array_filter((array)$request->input('phones', []), fn($v) => filled($v)));
-
-            $settings->update([
-                'emails' => $emails,
-                'phones' => $phones,
-                'address_line' => $request->input('address_line'),
-                'city' => $request->input('city'),
-                'country' => $request->input('country'),
-                'whatsapp_url' => $request->input('whatsapp_url'),
-                'facebook_url' => $request->input('facebook_url'),
-                'instagram_url' => $request->input('instagram_url'),
-                'linkedin_url' => $request->input('linkedin_url'),
-                'youtube_url' => $request->input('youtube_url'),
-                'portfolio_cta_text' => $request->input('portfolio_cta_text'),
-                'portfolio_cta_url' => $request->input('portfolio_cta_url'),
-                'footer_about_title' => $request->input('footer_about_title'),
-                'footer_about_text' => $request->input('footer_about_text'),
-                'logo_path' => $request->input('logo_path'),
-                'favicon_path' => $request->input('favicon_path'),
-            ]);
-
-            // Inline manage Footer Links (optional)
-            if ($request->has('footer_links')) {
-                $keepIds = [];
-                foreach ((array)$request->input('footer_links', []) as $row) {
-                    if (empty($row['label']) || empty($row['url'])) {
-                        continue;
-                    }
-                    $payload = [
-                        'label' => $row['label'],
-                        'url' => $row['url'],
-                        'group_key' => $row['group_key'] ?? 'useful',
-                        'display_order' => (int)($row['display_order'] ?? 0),
-                        'is_active' => !empty($row['is_active']),
-                        'company_id' => CompanyContext::id(),
-                    ];
-
-                    if (!empty($row['id'])) {
-                        $link = FooterLink::forCompany()->find($row['id']);
-                        if ($link) {
-                            $link->update($payload);
-                            $keepIds[] = $link->id;
-                        }
-                    } else {
-                        $link = FooterLink::create($payload);
-                        $keepIds[] = $link->id;
-                    }
+        // Prevent duplicate keys inside the same request
+        $validator = Validator::make($request->all(), $rules, $messages);
+        $validator->after(function ($v) use ($payload) {
+            $keys = [];
+            foreach ($payload as $rowKey => $row) {
+                $k = trim((string)($row['key'] ?? ''));
+                if ($k === '') continue;
+                $lower = mb_strtolower($k);
+                if (isset($keys[$lower])) {
+                    $v->errors()->add("settings.$rowKey.key", 'This key is duplicated in your submitted settings.');
+                } else {
+                    $keys[$lower] = true;
                 }
-
-                // Remove any links not present in payload (for this company)
-                FooterLink::forCompany()
-                    ->when(!empty($keepIds), fn($q) => $q->whereNotIn('id', $keepIds))
-                    ->delete();
             }
         });
 
-        return redirect()->route('voyager.site_settings.edit', $id)
-            ->with(['message' => 'تم حفظ الإعدادات بنجاح', 'alert-type' => 'success']);
+        $validator->validate();
+
+        DB::transaction(function () use ($request, $payload, $toDeleteIds) {
+
+            // 1) Delete marked rows (+ delete files)
+            if (!empty($toDeleteIds)) {
+                $deleteRows = SiteSetting::whereIn('id', $toDeleteIds)->get();
+                foreach ($deleteRows as $row) {
+                    if ($row->type === 'file' && $row->value) {
+                        $this->deleteStoredFile($row->value);
+                    }
+                    $row->delete();
+                }
+            }
+
+            // 2) Upsert rows
+            foreach ($payload as $rowKey => $row) {
+                // If user marked it deleted, skip
+                if (!empty($row['id']) && in_array((int)$row['id'], $toDeleteIds, true)) {
+                    continue;
+                }
+
+                $id = $row['id'] ?? null;
+                $type = $row['type'];
+                $key = trim($row['key']);
+
+                $setting = $id ? SiteSetting::find($id) : new SiteSetting();
+
+                if (!$setting) {
+                    // if the row was deleted concurrently, treat as new
+                    $setting = new SiteSetting();
+                }
+
+                $oldType = $setting->exists ? $setting->type : null;
+                $oldValue = $setting->exists ? $setting->value : null;
+
+                $setting->key = $key;
+                $setting->type = $type;
+
+                // Handle type switching cleanup (as agreed)
+                $switchedAwayFromFile = ($oldType === 'file' && in_array($type, ['text', 'longtext'], true));
+                $switchedToFile = (in_array($oldType, ['text', 'longtext'], true) && $type === 'file');
+
+                if ($switchedAwayFromFile && $oldValue) {
+                    $this->deleteStoredFile($oldValue);
+                    $oldValue = null;
+                }
+
+                if ($switchedToFile) {
+                    // clear incompatible text value
+                    $oldValue = null;
+                }
+
+                if (in_array($type, ['text', 'longtext'], true)) {
+                    $setting->value = (string)($row['value'] ?? '');
+                    $setting->save();
+                    continue;
+                }
+
+                // type=file
+                // if new file uploaded => upload + delete old file (if any)
+                $uploadedFile = $request->file("settings.$rowKey.file");
+
+                if ($uploadedFile) {
+                    if (!empty($oldValue)) {
+                        $this->deleteStoredFile($oldValue);
+                    }
+
+                    // Use your UploaderService (same style you already use)
+//                    $folderName = $this->uploadFolder;
+                    list($_, $path) = (new UploaderService())->uploadFile($uploadedFile, 'site_projects');
+//                    list($_, $path) = (new UploaderService())->uploadFile($uploadedFile, $folderName);
+
+                    $setting->value = $path;
+                    $setting->save();
+                } else {
+                    // no new upload => keep existing path (if exists), otherwise stays null (but validator already prevented that)
+                    $setting->value = $oldValue;
+                    $setting->save();
+                }
+            }
+        });
+
+        return redirect()->back()->with('success', 'Settings updated successfully.');
     }
 
-    // Optional quick-delete for a single footer link (AJAX)
-    public function deleteFooterLink(int $id): JsonResponse
+    private function deleteStoredFile(string $path): void
     {
-        $this->checkPermission('delete');
-
-        $link = FooterLink::forCompany()->findOrFail($id);
-        $link->delete();
-
-        return response()->json(['status' => true, 'message' => 'تم الحذف بنجاح']);
+        // UploaderService stores paths like "site_settings/xxx.ext"
+        // Ensure we delete from the disk used by your upload flow (usually "public")
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
     }
 }

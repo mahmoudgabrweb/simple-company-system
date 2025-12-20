@@ -5,18 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/v2', function () {
-    return view('welcome2');
-});
-
-Route::get('/v3', function () {
-    return view('welcome3');
-});
-
 Route::group(['prefix' => 'admin', "middleware" => ['company.context']], function () {
     Route::get('/company/select', [\App\Http\Controllers\Admin\CompanySwitchController::class, 'select'])
         ->name('admin.company.select')->middleware(['web', 'auth']);
@@ -112,16 +100,21 @@ Route::group(['prefix' => 'admin', "middleware" => ['company.context']], functio
     Route::get('/quotations/{quotation}/pdf', [\App\Http\Controllers\Admin\QuotationPdfController::class, 'download'])
         ->name('voyager.quotations.pdf');
 
-    Route::get('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])->name('site_settings.index');
-    Route::get('site-settings/{id}/edit', [\App\Http\Controllers\Admin\SiteSettingController::class, 'edit'])->name('site_settings.edit');
-    Route::match(['put', 'patch'], 'site-settings/{id}', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('site_settings.update');
-
     // Inline footer link deletion (AJAX)
-    Route::delete('site-settings/footer-link/{id}', [\App\Http\Controllers\Admin\SiteSettingController::class, 'deleteFooterLink'])->name('site_settings.footer_link.delete');
+    Route::get('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'edit'])->name('admin.site_settings.edit');
+    Route::put('site-settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])->name('admin.site_settings.update');
 
     Route::get('/', fn() => redirect()->route('voyager.projects.index'))
         ->name('voyager.dashboard');
 
     Voyager::routes();
-
 });
+
+Route::get("/", [\App\Http\Controllers\FrontController::class, "home"]);
+Route::get("/projects", [\App\Http\Controllers\FrontController::class, "projects"]);
+Route::get("/projects/load-details/{id}", [\App\Http\Controllers\FrontController::class, "loadProjectDetails"]);
+Route::get("/projects/{id}/{slug}", [\App\Http\Controllers\FrontController::class, "projectDetails"]);
+Route::get("/services", [\App\Http\Controllers\FrontController::class, "services"]);
+Route::get("/about-us", [\App\Http\Controllers\FrontController::class, "about"]);
+Route::get("/contact-us", [\App\Http\Controllers\FrontController::class, "contact"]);
+Route::post("/sendMessage", [\App\Http\Controllers\FrontController::class, "sendMessage"]);

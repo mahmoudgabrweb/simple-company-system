@@ -8,7 +8,7 @@ use App\Models\Quotation;
 use App\Models\QuotationItem;
 use App\Models\QuotationSection;
 use App\Models\Unit;
-use App\Models\SiteProject;
+use App\Models\Project;
 use App\Support\CompanyContext;
 use Barryvdh\DomPDF\Facade\Pdf; // at top
 use Illuminate\Http\Request;
@@ -32,7 +32,7 @@ class QuotationController extends Controller
     public function create()
     {
         $this->authorize('add', app(Quotation::class));
-        $projects = SiteProject::where("company_id", CompanyContext::id())->orderBy('name')->get();
+        $projects = Project::where("company_id", CompanyContext::id())->orderBy('name')->get();
         return view('admin.quotations.create', compact('projects'))
             ->with('currentCompany', CompanyContext::company());
     }

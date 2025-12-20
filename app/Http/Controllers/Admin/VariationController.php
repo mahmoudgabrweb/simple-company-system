@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\{SiteProject, Quotation, Variation, VariationSection, VariationItem, Unit};
+use App\Models\{Project, Quotation, Variation, VariationSection, VariationItem, Unit};
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ class VariationController extends MainController
     }
 
     // Guard: project must have an ACTIVE quotation that is NOT completed
-    protected function assertProjectAllowsVariation(SiteProject $project): Quotation
+    protected function assertProjectAllowsVariation(Project $project): Quotation
     {
         // "Active quotation" as we used earlier: the single active-per-project, not completed
         $active = Quotation::where('project_id', $project->id)
@@ -35,7 +35,7 @@ class VariationController extends MainController
     }
 
     // List all variations for a project
-    public function index(SiteProject $project)
+    public function index(Project $project)
     {
         $this->checkPermission('browse');
 
@@ -46,7 +46,7 @@ class VariationController extends MainController
         return view('admin.variations.index', compact('project', 'variations'));
     }
 
-    public function create(SiteProject $project)
+    public function create(Project $project)
     {
         $this->checkPermission('add');
         $activeQuotation = $this->assertProjectAllowsVariation($project);
@@ -55,7 +55,7 @@ class VariationController extends MainController
         return view('admin.variations.create', compact('project', 'units', 'activeQuotation'));
     }
 
-    public function store(Request $request, SiteProject $project): RedirectResponse
+    public function store(Request $request, Project $project): RedirectResponse
     {
         $this->checkPermission('add');
         $activeQuotation = $this->assertProjectAllowsVariation($project);
@@ -123,7 +123,7 @@ class VariationController extends MainController
             ->with('success', 'Variation created.');
     }
 
-    public function show(SiteProject $project, Variation $variation)
+    public function show(Project $project, Variation $variation)
     {
         $this->checkPermission('read');
         abort_unless($variation->project_id === $project->id, 404);
@@ -132,7 +132,7 @@ class VariationController extends MainController
         return view('admin.variations.show', compact('project', 'variation'));
     }
 
-    public function edit(SiteProject $project, Variation $variation)
+    public function edit(Project $project, Variation $variation)
     {
         $this->checkPermission('edit');
         abort_unless($variation->project_id === $project->id, 404);
@@ -146,7 +146,7 @@ class VariationController extends MainController
         return view('admin.variations.edit', compact('project', 'variation', 'units'));
     }
 
-    public function update(Request $request, SiteProject $project, Variation $variation): RedirectResponse
+    public function update(Request $request, Project $project, Variation $variation): RedirectResponse
     {
         $this->checkPermission('edit');
         abort_unless($variation->project_id === $project->id, 404);
@@ -216,7 +216,7 @@ class VariationController extends MainController
             ->with('success', 'Variation updated.');
     }
 
-    public function destroy(SiteProject $project, Variation $variation): RedirectResponse
+    public function destroy(Project $project, Variation $variation): RedirectResponse
     {
         $this->checkPermission('delete');
         abort_unless($variation->project_id === $project->id, 404);

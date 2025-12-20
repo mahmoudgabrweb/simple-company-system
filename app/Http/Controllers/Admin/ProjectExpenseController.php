@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProjectExpense;
-use App\Models\SiteProject;
+use App\Models\Project;
 use App\Models\Employee;
 use App\Support\CompanyContext;
 use Illuminate\Http\Request;
@@ -46,7 +46,7 @@ class ProjectExpenseController extends Controller
         $paymentsMap = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة', 'other' => 'أخرى'];
 
         $expenses = $q->paginate(20)->appends($request->query());
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $types = $paymentsMap;
 
         return view('admin.project_expenses.index', compact('expenses', 'projects', 'types', 'sumAll', 'sumTypes', 'paymentsMap'));
@@ -57,7 +57,7 @@ class ProjectExpenseController extends Controller
         $this->authorize('add', app(ProjectExpense::class));
 
         $companyId = $this->activeCompanyId();
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $employees = Employee::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $types = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة', 'other' => 'أخرى'];
 
@@ -121,7 +121,7 @@ class ProjectExpenseController extends Controller
         $expense = ProjectExpense::when($companyId, fn($x) => $x->where('company_id', $companyId))
             ->with(['project', 'payer'])->findOrFail($id);
 
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $employees = Employee::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $types = ['cash' => 'نقدًا', 'transfer' => 'تحويل', 'cheque' => 'شيك', 'card' => 'بطاقة', 'other' => 'أخرى'];
 

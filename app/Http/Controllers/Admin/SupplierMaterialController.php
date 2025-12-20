@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SupplierMaterial;
 use App\Models\Supplier;
-use App\Models\SiteProject;
+use App\Models\Project;
 use App\Models\Employee;
 use App\Support\CompanyContext;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class SupplierMaterialController extends Controller
 
         $materials = $q->paginate(20)->appends($request->query());
         $suppliers = Supplier::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
 
         return view('admin.supplier_materials.index', compact('materials', 'suppliers', 'projects', 'sumAll'));
     }
@@ -50,7 +50,7 @@ class SupplierMaterialController extends Controller
 
         $companyId = $this->activeCompanyId();
         $suppliers = Supplier::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $employees = Employee::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
 
         if (!$companyId) session()->flash('error', 'No active company selected — displaying all suppliers, projects and employees.');
@@ -103,7 +103,7 @@ class SupplierMaterialController extends Controller
             ->findOrFail($id);
 
         $suppliers = Supplier::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
-        $projects = SiteProject::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
+        $projects = Project::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
         $employees = Employee::when($companyId, fn($x) => $x->where('company_id', $companyId))->orderBy('name')->get();
 
         return view('admin.supplier_materials.edit', compact('material', 'suppliers', 'projects', 'employees'));

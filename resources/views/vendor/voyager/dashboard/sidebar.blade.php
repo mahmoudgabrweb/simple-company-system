@@ -61,7 +61,7 @@
 </svg>
 
             </span>
-            <span class="app-brand-text demo menu-text fw-bold">KAME</span>
+            <span class="app-brand-text demo menu-text fw-bold">AIA Interior</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
